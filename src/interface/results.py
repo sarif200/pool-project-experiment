@@ -240,7 +240,7 @@ def show_results():
             )
         ],
         [sg.Output(size=(65, 5), key='-OUTPUT-')],
-        [sg.Button('Clear')]
+        [sg.Button('Clear'), sg.Button('Close', key="Exit")]
     ]
 
     window = sg.Window("Results", layout, location=(0,0))
