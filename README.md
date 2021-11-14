@@ -3,6 +3,7 @@
 ## dependencies
 - opencv2
 - numpy
+- PySimpleGUI
 
 ## todo
 - [ ] eye tracking
