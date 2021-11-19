@@ -5,8 +5,19 @@
 - numpy
 - PySimpleGUI
 
-## todo
-- [ ] eye tracking
-- [ ] transform to screen space
-- [ ] ui
-- [ ] timing
+## To do:
+
+### User Interface
+- [ ] Calibration Window
+- [ ] Settings Window
+- [ ] Screen size dropdownbox
+- [ ] Camera Frame Rate & Camera resolution dropdown box
+- [ ] Export & import video
+- [ ] Screen capture & Camera Capture
+- [ ] Timer
+- [ ] Image Slideshow
+
+### Program
+- [ ] Main Eye tracking
+- [ ] Screen projection
+- [ ] After & live processing
