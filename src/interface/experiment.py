@@ -1,9 +1,9 @@
 from tkinter import colorchooser
 import PySimpleGUI as sg
 import os, io, time
-from PIL import Image
+#from PIL import Image
 
-print(os.getcwd())
+
 
 def countdown(t):
     while t:
@@ -15,11 +15,11 @@ def countdown(t):
 
 def experiment():
 
-    images = ''
+    #images = ''
 
     frame = [
         [
-            sg.Image('./big-pause-button.png')
+            sg.Image('./src/interface/big-pause-button.png')
         ]
     ]
 
@@ -37,10 +37,10 @@ def experiment():
             sg.Text(key="-TIME-", text_color="red")
         ]
     ]
-
+    
     window = sg.Window("Window", layout).finalize()
     window.Maximize()
-
+    
     while True:
         # for image in images:
         #     Img = Image.open(values[image])
