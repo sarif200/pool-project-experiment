@@ -1,6 +1,17 @@
+from tkinter import colorchooser
 import PySimpleGUI as sg
-import os, io
+import os, io, time
 from PIL import Image
+
+print(os.getcwd())
+
+def countdown(t):
+    while t:
+        mins, secs = divmod(t, 60)
+        timer = '{:02d}:{:02d}'.format(mins, secs)
+        print(timer, end="\r")
+        time.sleep(1)
+        t -= 1
 
 def experiment():
 
@@ -8,20 +19,22 @@ def experiment():
 
     frame = [
         [
-            sg.Image(key="-IMAGE-")
+            sg.Image('./big-pause-button.png')
         ]
     ]
 
     layout = [
         [
-            sg.Text('Experiment'), 
-            sg.Button('Exit')
+            sg.Text('Experiment'),
         ],
         [
             sg.HorizontalSeparator()
         ],
         [
             sg.Frame('Image Projection', frame)
+        ],
+        [
+            sg.Text(key="-TIME-", text_color="red")
         ]
     ]
 
@@ -29,13 +42,12 @@ def experiment():
     window.Maximize()
 
     while True:
-        for image in images:
-            image = Image.open(values[image])
-            image.thumbnail((400, 400))
-            bio = io.BytesIO()
-            image.save(bio, format="PNG")
-            window["-IMAGE-"].update(data=bio.getvalue())
-            
+        # for image in images:
+        #     Img = Image.open(values[image])
+        #     Img.thumbnail((400, 400))
+        #     bio = io.BytesIO()
+        #     Img.save(bio, format="PNG")
+        #     window["-IMAGE-"].update(data=bio.getvalue())
 
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
