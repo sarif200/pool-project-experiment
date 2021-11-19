@@ -2,7 +2,7 @@
 import PySimpleGUI as sg
 
 # Open New Window
-def show_results():
+def resultsWindow():
     # Layout
     # Tab group 1
     T1 = sg.Tab("Basic", [
@@ -243,7 +243,7 @@ def show_results():
         [sg.Button('Clear'), sg.Button('Close', key="Exit")]
     ]
 
-    window = sg.Window("Results", layout, location=(0,0))
+    window = sg.Window("Results", layout)
 
     while True:
         event, values = window.read()

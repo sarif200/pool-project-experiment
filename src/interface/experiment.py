@@ -7,7 +7,7 @@ def experiment():
         [sg.Button('Close', key="Exit")]
     ]
 
-    window = sg.Window("Results", layout, location=(0,0))
+    window = sg.Window("Results", layout)
 
     while True:
         event, values = window.read()

@@ -1,13 +1,13 @@
 import PySimpleGUI as sg
 
-def calibrate():
+def calibrationWindow():
 
     layout = [
         [sg.Text('Calibration')],
         [sg.Button('Close', key="Exit")]
     ]
 
-    window = sg.Window("Results", layout, location=(0,0))
+    window = sg.Window("Results", layout)
 
     while True:
         event, values = window.read()
