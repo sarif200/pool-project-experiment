@@ -1,9 +1,6 @@
-from tkinter import colorchooser
 import PySimpleGUI as sg
 import os, io, time
-#from PIL import Image
-
-
+from PIL import Image
 
 def countdown(t):
     while t:
@@ -15,11 +12,12 @@ def countdown(t):
 
 def experiment():
 
-    #images = ''
+    img_folder = os.path.abspath('.src/img')
+    images = os.listdir(img_folder)
 
     frame = [
         [
-            sg.Image('./src/interface/big-pause-button.png')
+            sg.Image(key="-IMAGE-")
         ]
     ]
 
@@ -42,12 +40,12 @@ def experiment():
     window.Maximize()
     
     while True:
-        # for image in images:
-        #     Img = Image.open(values[image])
-        #     Img.thumbnail((400, 400))
-        #     bio = io.BytesIO()
-        #     Img.save(bio, format="PNG")
-        #     window["-IMAGE-"].update(data=bio.getvalue())
+        for image in images:
+            Img = Image.open(values[image])
+            Img.thumbnail((400, 400))
+            bio = io.BytesIO()
+            Img.save(bio, format="PNG")
+            window["-IMAGE-"].update(data=bio.getvalue())
 
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
