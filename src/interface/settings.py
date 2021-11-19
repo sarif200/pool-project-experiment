@@ -19,6 +19,9 @@ def SettingsWindow():
         [
             sg.Text('Camera Frame Rate:'), sg.Combo(values = camera_frame_rate)
         ],
+        [
+            sg.Text('Open Live Tracking Window (Dev mode)'), sg.Checkbox('Dev_mode', key='-dev_mode-')
+        ]
     ]
 
     window = sg.Window("Results", layout)
