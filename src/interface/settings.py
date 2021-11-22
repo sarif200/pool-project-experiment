@@ -31,3 +31,5 @@ def SettingsWindow():
         print(event, values)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+
+    window.close()
