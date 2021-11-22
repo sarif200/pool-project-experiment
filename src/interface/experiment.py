@@ -12,11 +12,12 @@ def countdown(t):
 
 def experiment():
 
-    img_folder = os.path.abspath('.src/img')
+    img_folder = os.path.abspath('./src/img')
     images = os.listdir(img_folder)
 
     frame = [
         [
+            # sg.Image('./src/img/big-pause-button.png')
             sg.Image(key="-IMAGE-")
         ]
     ]
@@ -41,11 +42,14 @@ def experiment():
     
     while True:
         for image in images:
+            print(image)
             Img = Image.open(values[image])
             Img.thumbnail((400, 400))
             bio = io.BytesIO()
             Img.save(bio, format="PNG")
             window["-IMAGE-"].update(data=bio.getvalue())
+            t=30
+            countdown(t)
 
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
