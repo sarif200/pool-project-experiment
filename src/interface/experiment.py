@@ -40,16 +40,25 @@ def experiment():
     window = sg.Window("Window", layout).finalize()
     window.Maximize()
     
+    offset = 0
+
     while True:
+        print(len(images))
+
         for image in images:
-            print(image)
-            Img = Image.open(values[image])
-            Img.thumbnail((400, 400))
-            bio = io.BytesIO()
-            Img.save(bio, format="PNG")
-            window["-IMAGE-"].update(data=bio.getvalue())
-            t=30
-            countdown(t)
+            offset += (offset < len(images) - 1)
+            image = images[offset]
+            
+
+            # Img = Image.open(values[image])
+            # Img.thumbnail((400, 400))
+            # bio = io.BytesIO()
+            # Img.save(bio, format="PNG")
+            # window["-IMAGE-"].update(data=bio.getvalue())
+            # t=30
+            # countdown(t)
+
+        window['-IMAGE-'].update(image)
 
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
