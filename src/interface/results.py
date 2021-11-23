@@ -72,18 +72,31 @@ def resultsWindow():
 
     # Tabgroup 3
     T3 = sg.Tab("mask", [
-        [
-            sg.Radio(
-                'Rectangle',
-                "RADIO2",
-                key='-RECTANGLE_MASK-',
-                default=True,
-                size=(8, 1)
+      [
+            sg.Text(
+                'Show Original Video'
             ),
-            sg.Radio(
-                'Masking',
-                "RADIO2",
+            sg.Checkbox(
+                key='-ORIGINAL-',
+                size=(8, 1)
+            )
+        ],
+        [
+            sg.Text(
+                'Show Mask Video'
+            ),
+            sg.Checkbox(
                 key='-MASKING-',
+                size=(8, 1),
+              default=True
+            )
+        ],
+        [
+            sg.Text(
+                'Show Display'
+            ),
+            sg.Checkbox(
+                key='-DISPLAY-',
                 size=(8, 1)
             )
         ],
