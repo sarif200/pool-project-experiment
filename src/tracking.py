@@ -5,7 +5,12 @@ import os
 
 print(os.getcwd())
 
-cap = cv2.VideoCapture('./src/assets/video.mp4')
+filename = './src/assets/video.mp4'
+
+if filename == '':
+    filename = 0
+
+cap = cv2.VideoCapture(filename)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
