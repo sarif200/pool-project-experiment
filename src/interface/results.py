@@ -363,7 +363,7 @@ def resultsWindow():
                 frame_count = s_frame
                 continue
 
-            # if values['-MASKING']:
+            # if values['-MASKING-']:
             #     # Masks
             #     #Display image
             #         cv.imshow("Movie", frame)
@@ -384,6 +384,13 @@ def resultsWindow():
             #         #Clear log window
             #         if event == 'Clear':
             #             window['-OUTPUT-'].update('')
+            
+            # if values['-DISPLAY-']:
+            #   # Display screen recording with projection
+            #   pass
+            
+            # if values['-ORIGINAL']:
+            #   pass
 
     finally:
         cv.destroyWindow("Movie")
