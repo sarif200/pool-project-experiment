@@ -366,7 +366,6 @@ def resultsWindow():
             # if values['-MASKING-']:
             #     # Masks
             #     #Display image
-            #         cv.imshow("Movie", frame)
             #         if values['-MASKING-']:
             #             cv.imshow("Mask", cv.cvtColor(mask, cv.COLOR_GRAY2BGR))
             #             cv.setWindowProperty("Mask", cv.WND_PROP_VISIBLE, 0)
@@ -387,10 +386,16 @@ def resultsWindow():
             
             # if values['-DISPLAY-']:
             #   # Display screen recording with projection
-            #   pass
+            #   cv.imshow("Display", frame)
+            #   # function tracking with imput filename
+            # elif not values['-DISPLAY-'] and cv.getWindowProperty("Display", cv.WND_PROP_VISIBLE):
+            #   cv.destroyWindow("Display")
             
-            # if values['-ORIGINAL']:
-            #   pass
+            # if values['-ORIGINAL-']:
+            #   # Original Video
+            #   cv.imshow("Original", frame)
+            # elif not values['-ORIGINAL-'] and cv.getWindowProperty("Original", cv.WND_PROP_VISIBLE):
+            #   cv.destroyWindow("Original")
 
     finally:
         cv.destroyWindow("Movie")
