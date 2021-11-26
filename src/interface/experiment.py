@@ -22,16 +22,14 @@ def experiment():
         [
             sg.Frame('Image Projection', frame)
         ],
+        # [sg.Image(key="-IMAGE-")],
         [
             sg.Text(key="-TIME-", text_color="red")
         ]
     ]
     
     window = sg.Window("Window", layout).finalize()
-    window.Maximize()
-
-    maxsize=(1200, 850)
-    t = 30
+    # window.Maximize()
 
     while True:
         # Get file path
@@ -51,7 +49,6 @@ def experiment():
         # Get files separatly
         for image in images:
             img_path = os.path.join(img_folder, image)
-            # get_img(image)
             print(img_path)
 
             img = Image.open(img_path)
@@ -59,16 +56,19 @@ def experiment():
             bio = io.BytesIO()
             img.save(bio, format="PNG")
             print(img)
-            window['-IMAGE-'].update(img)
-            
+            window["-IMAGE-"].update(data=bio.getvalue())
 
-            while t:
-                mins, secs = divmod(t, 60)
-                timer = '{:02d}:{:02d}'.format(mins, secs)
-                print(timer, end="\r")
-                time.sleep(1)
-                t -= 1
-                window['-TIME-'].update(t)
+            # xs countdown
+            # t = 10          
+            # while t:
+            #     mins, secs = divmod(t, 60)
+            #     timer = '{:02d}:{:02d}'.format(mins, secs)
+            #     time.sleep(1)
+            #     t -= 1
+            #     print(timer, end="\r")
+            #     window['-TIME-'].update(t)
+            
+            time.sleep(10)
 
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
