@@ -52,7 +52,7 @@ def experiment():
     window = sg.Window("Window", layout).finalize()
     window.Maximize()
     
-    offset = 0
+    maxsize=(1200, 850)
 
     while True:
         # Get file path
@@ -71,13 +71,15 @@ def experiment():
 
         # Get files separatly
         for image in images:
+            img_path = os.path.join(img_folder, image)
             # get_img(image)
-            print(image)
+            print(img_path)
 
-            img = Image.open(image)
+            img = Image.open(img_path)
             img.thumbnail(maxsize)
             bio = io.BytesIO()
             img.save(bio, format="PNG")
+            print(img)
             window['-IMAGE-'].update(img)
 
         # print(len(images))
