@@ -28,7 +28,7 @@ predictor = dlib.shape_predictor('./src/assets/shape_predictor_68_face_landmarks
 
 params = cv2.SimpleBlobDetector_Params()
 
-
+params.minThreshold = 0
 
 params.filterByConvexity = False
 params.minConvexity = 0.1
@@ -91,8 +91,8 @@ while True:
     #cv2.rectangle(frame,(landmarks.part(36).x,center_top[1]),(landmarks.part(39).x,center_bottom[1]),(0,255,0),3)
 
     #pupil = blob_detector.detect(img_l_eye)
-    cut_eyebrow = cut_eyebrows(img_l_eye)
-    blur = cv2.GaussianBlur(cut_eyebrow,(5,5),0)
+    #cut_eyebrow = cut_eyebrows(img_l_eye)
+    blur = cv2.GaussianBlur(img_l_eye,(5,5),0)
     #inv = cv2.bitwise_not(blur)
     #thresh = cv2.cvtColor(inv, cv2.COLOR_BGR2GRAY)
     ret,thresh1 = cv2.threshold(blur,55,255,cv2.THRESH_BINARY)
@@ -114,7 +114,7 @@ while True:
 
     #im_tresh = cut_eyebrows(img_l_eye)
     pupil = blob_detector.detect(erosion)
-    im_with_keypoints = cv2.drawKeypoints(cut_eyebrow, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     for keyPoint in pupil:
         x = keyPoint.pt[0]
         y = keyPoint.pt[1]
