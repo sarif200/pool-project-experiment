@@ -15,6 +15,15 @@ if (cap.isOpened()== False):
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./src/assets/shape_predictor_68_face_landmarks.dat')
 
+params = cv2.SimpleBlobDetector_Params()
+
+params.minThreshold = 10
+params.maxThreshold = 255
+
+
+blob_detector = cv2.SimpleBlobDetector_create(params)
+
+
 left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
 right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
 
@@ -30,6 +39,11 @@ def calc_pupil(landmarks,side):
         y_sum += landmarks.part(i).y
     coord = (int(x_sum/len(side)),int(y_sum/len(side)))
     return coord
+
+def cut_eyebrows(img):
+    height, width = img.shape[:2]
+    eyebrow_h = int(height / 4)
+    return img[eyebrow_h:height, 0:width]  # cut eyebrows out (15 px)return img
 
 
 while True:
@@ -51,17 +65,32 @@ while True:
     center_top = midpoint(landmarks.part(37), landmarks.part(38))
     center_bottom = midpoint(landmarks.part(41), landmarks.part(40))
 
-    hor_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2)
-    ver_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+    img_l_eye = gray[center_top[1]:center_bottom[1],landmarks.part(36).x:landmarks.part(39).x]
+
+    #hor_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2)
+    #ver_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
     
-    left_cord = calc_pupil(landmarks,left)
-    right_cord = calc_pupil(landmarks,right)
+    #left_cord = calc_pupil(landmarks,left)
+    #right_cord = calc_pupil(landmarks,right)
 
-    cv2.circle(frame, left_cord, 10, (255), -1)
-    cv2.circle(frame, right_cord, 10, (255), -1)
+    #cv2.circle(frame, left_cord, 10, (255), -1)
+    #cv2.circle(frame, right_cord, 10, (255), -1)
 
-    cv2.imshow("Frame", frame)
+    #cv2.rectangle(frame,(landmarks.part(36).x,center_top[1]),(landmarks.part(39).x,center_bottom[1]),(0,255,0),3)
 
+    #pupil = blob_detector.detect(img_l_eye)
+
+    #im_with_keypoints = cv2.drawKeypoints(img_l_eye, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    ret,im_tresh = cv2.threshold(img_l_eye,70,255,cv2.THRESH_BINARY)
+
+    #im_tresh = cv2.adaptiveThreshold(img_l_eye,80,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,11,2)
+
+    im_tresh = cut_eyebrows(im_tresh)
+    pupil = blob_detector.detect(im_tresh)
+    im_with_keypoints = cv2.drawKeypoints(im_tresh, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    cv2.imshow("Frame",im_with_keypoints )
+    
     key = cv2.waitKey(1)
     if key == 27:
         break
