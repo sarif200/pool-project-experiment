@@ -22,14 +22,13 @@ def experiment():
         [
             sg.Frame('Image Projection', frame)
         ],
-        # [sg.Image(key="-IMAGE-")],
         [
             sg.Text(key="-TIME-", text_color="red")
         ]
     ]
     
     window = sg.Window("Window", layout).finalize()
-    # window.Maximize()
+    window.Maximize()
 
     while True:
         # Get file path
@@ -52,7 +51,7 @@ def experiment():
             print(img_path)
 
             img = Image.open(img_path)
-            img.thumbnail((400, 400))
+            img.thumbnail((1200, 400))
             bio = io.BytesIO()
             img.save(bio, format="PNG")
             print(img)
