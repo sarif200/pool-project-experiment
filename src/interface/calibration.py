@@ -13,3 +13,5 @@ def calibrationWindow():
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+    
+    window.close()
