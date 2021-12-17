@@ -17,5 +17,6 @@ def createFolder():
 
     os.mkdir(final_path)
     print("Directory '% s' created" % foldername)
+    cycle_images()
 
     return foldername
