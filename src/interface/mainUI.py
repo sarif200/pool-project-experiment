@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 from results import resultsWindow
 from calibration import calibrationWindow
-from temp import cycle_images
+from experiment import cycle_images
 from settings import SettingsWindow
 
 # Main window
