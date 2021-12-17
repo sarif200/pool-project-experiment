@@ -1,13 +1,13 @@
 import PySimpleGUI as sg
 from results import resultsWindow
 from calibration import calibrationWindow
-from experiment import cycle_images
+from create_new_project import createFolder
 from settings import SettingsWindow
 
 # Main window
 def main():
     layout = [
-        [sg.Text("Title"), sg.Button("Calibrate", key=("calibrate")), sg.Button("Start", key=("start_test")), sg.Button("Show Results", key=("show_results")), sg.Button("Settings", key=("settings"))],
+        [sg.Text("Project Eye Tracking"), sg.Button("New Project", key=("new_project")), sg.Button("Show Results", key=("show_results")), sg.Button("Settings", key=("settings"))],
         [sg.HorizontalSeparator()],
     ]
 
@@ -21,8 +21,8 @@ def main():
             resultsWindow()
         if event == "calibrate":
             calibrationWindow()
-        if event == "start_test":
-            cycle_images()
+        if event == "new_project":
+            createFolder()
         if event == "settings":
             SettingsWindow()
 
