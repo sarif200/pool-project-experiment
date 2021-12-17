@@ -1,9 +1,9 @@
-import cv2 as cv
-import os, time
+import cv2
+import os
 
 def cycle_images():
     TIME = 3
-    t = TIME * 1000
+    t = TIME * 1000 # transform to miliseconds
 
     # Get file path
     scriptDir = os.path.dirname(__file__)
@@ -18,17 +18,17 @@ def cycle_images():
     # # Count files in folder
     # img_length = len(images)
     # print(img_length)
-    
+
     for image in images:
         img_path = os.path.join(img_folder, image)
         print(img_path)
-        img = cv.imread(img_path, 0)
-        cv.namedWindow("Image", cv.WND_PROP_FULLSCREEN)
-        cv.setWindowProperty("Image", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
-        cv.imshow('Image', img)
-        key = cv.waitKey(t)
-        if key == 27:#if ESC is pressed, exit loop
-            cv.destroyAllWindows()
+        img = cv2.imread(img_path, 0)
+        cv2.namedWindow("Image", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("Image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.imshow('Image', img)
+        key = cv2.waitKey(t) # is miliseconds
+        if key == 27: #if ESC is pressed, exit loop
+            cv2.destroyAllWindows()
             break
 
-    cv.destroyAllWindows()
+    cv2.destroyAllWindows()

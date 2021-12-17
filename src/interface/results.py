@@ -284,7 +284,6 @@ def resultsWindow():
 
     window = sg.Window("Results", layout)
 
-
     try:
         while True:
             event, values = window.read()
