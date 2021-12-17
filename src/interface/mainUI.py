@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 from results import resultsWindow
 from calibration import calibrationWindow
-from experiment import experiment
+from temp import cycle_images
 from settings import SettingsWindow
 
 # Main window
@@ -22,7 +22,7 @@ def main():
         if event == "calibrate":
             calibrationWindow()
         if event == "start_test":
-            experiment()
+            cycle_images()
         if event == "settings":
             SettingsWindow()
 
