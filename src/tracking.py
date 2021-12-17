@@ -112,7 +112,7 @@ class pupil_tracker:
         kernel = np.ones((2,2),np.uint8)
         erosion = cv2.erode(thresh1,kernel,iterations = 1)
         
-
+        cv2.imshow("test",erosion)
         #im_tresh = cut_eyebrows(img_l_eye)
         #blob detection 
         pupil = blob_detector.detect(erosion)
