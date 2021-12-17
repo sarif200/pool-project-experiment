@@ -14,8 +14,8 @@
 - [ ] Camera Frame Rate & Camera resolution dropdown box
 - [ ] Export & import video
 - [ ] Screen capture & Camera Capture
-- [ ] Timer
-- [ ] Image Slideshow
+- [x] Timer
+- [x] Image Slideshow
 
 ### Program
 - [ ] Main Eye tracking
