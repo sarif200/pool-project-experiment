@@ -156,6 +156,8 @@ class pupil_tracker:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
         faces = detector(gray)
+        if len(faces):
+            return ((0,0),(0,0))
         for face in faces:
             #x, y = face.left(), face.top()
             #x1, y1 = face.right(), face.bottom()
