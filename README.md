@@ -21,3 +21,8 @@
 - [ ] Main Eye tracking
 - [ ] Screen projection
 - [ ] After & live processing
+- [ ] global class to store fault data(like when the blobdetector doesn't find a blob)
+
+## Coding guides
+
+- mark when going from one cordinate system to an other with "#--------transform to ****** space------------"

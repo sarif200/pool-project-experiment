@@ -11,6 +11,10 @@ import os
 #Image and Vision Computing (IMAVIS), Special Issue on Facial Landmark Localisation "In-The-Wild". 2016.
 
 
+# l = left (-x) and r = right (+x) 
+
+
+
 filename = './src/assets/video.mp4'
 
 if filename == '':
@@ -63,20 +67,25 @@ class pupil_tracker:
     left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
 
+    #global declerations
     face_detector = dlib.get_frontal_face_detector()
     predictor
     params = cv2.SimpleBlobDetector_Params()
     params.minThreshold = 0
     blob_detector = cv2.SimpleBlobDetector_create(params)
 
+    #get the middle of two points in 2d  space
     def midpoint(p1, p2):
         return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
+    #cut the top 4th of a image
     def cut_eyebrows(img):
         height, width = img.shape[:2]
         eyebrow_h = int(height / 4)
         return img[eyebrow_h:height, 0:width]  # cut eyebrows out (15 px)return img
 
+    #calculate the midle of the landmarks this aproximates in most case the place of the pupil
+    #is not accurate when the eye is recorded from extreem angles
     def calc_pupil(landmarks,side):
         x_sum =0
         y_sum =0
@@ -86,11 +95,14 @@ class pupil_tracker:
         coord = (int(x_sum/len(side)),int(y_sum/len(side)))
         return coord
 
+    
     def __init__(self, shape_predictor_file = './src/assets/shape_predictor_68_face_landmarks.dat'):
         self.predictor = dlib.shape_predictor(shape_predictor_file)
-        
-    def detect_pupil(eye,backup):
+    
+    #this wil find and return the most probable place of the pupil 
+    def detect_pupil(eye,backup): # backup is a point that is returned by a calc pupil func
 
+        # edit the images so it the blob detector wil work better
         blur = cv2.GaussianBlur(img_l_eye,(5,5),0)
         ret,thresh1 = cv2.threshold(blur,55,255,cv2.THRESH_BINARY)
         kernel = np.ones((2,2),np.uint8)
@@ -98,15 +110,17 @@ class pupil_tracker:
         
 
         #im_tresh = cut_eyebrows(img_l_eye)
+        #blob detection 
         pupil = blob_detector.detect(erosion)
-        im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        #im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
+        #if no blobs are found we  return the backup
         if len(pupil) ==0:
             return backup
 
-            
+        #if  we find keypoints we select the closed one to the     
         selected_keypoint = (0,0)
-        selected_keypoint_len_cubed = 10000 #random number that is hopfully larger then all the real values #Needs fix
+        selected_keypoint_len_cubed = 1000000 #random number that is hopfully larger then all the real values #Needs fix
         for keyPoint in pupil:
             x = keyPoint.pt[0]
             y = keyPoint.pt[1]
@@ -119,16 +133,16 @@ class pupil_tracker:
 
 
             #--------transform to full screen------------
-            x += landmarks.part(36).x 
-            y += center_top[1]
+            #x += landmarks.part(36).x 
+            #y += center_top[1]
             #s = keyPoint.size
-            cv2.circle(frame,(int(x),int(y)),10,(0,255,0),3)
+            #cv2.circle(frame,(int(x),int(y)),10,(0,255,0),3)
 
 
         #print(pupil)
 
-        cv2.imshow("Frame",erosion )
-        return pupil
+        #cv2.imshow("Frame",erosion )
+        return selected_keypoint
 
     
 
@@ -143,16 +157,24 @@ class pupil_tracker:
             pass
 
         landmarks = predictor(gray, face)
-        left_point = (landmarks.part(36).x, landmarks.part(36).y)
-        right_point = (landmarks.part(39).x, landmarks.part(39).y)
+        #left_point = (landmarks.part(36).x, landmarks.part(36).y)
+        #right_point = (landmarks.part(39).x, landmarks.part(39).y)
 
-        center_top = midpoint(landmarks.part(37), landmarks.part(38))
-        center_bottom = midpoint(landmarks.part(41), landmarks.part(40))
+        center_top_l = midpoint(landmarks.part(37), landmarks.part(38))
+        center_bottom_l = midpoint(landmarks.part(41), landmarks.part(40))
+
+        center_top_r = midpoint(landmarks.part(43), landmarks.part(44))
+        center_bottom_r = midpoint(landmarks.part(47), landmarks.part(46))
+        
 
         img_l_eye = gray[center_top[1]:center_bottom[1],landmarks.part(36).x:landmarks.part(39).x]
+        img_r_eye = gray[center_top[1]:center_bottom[1],landmarks.part(42).x:landmarks.part(45).x]
 
+        backup_l = calc_pupil(landmarks,left)
+        backup_r = calc_pupil(landmarks,right)
+        #--------transform to eye space------------
 
-
+        pupil_l = detect_pupil(img_l_eye,backup_l)
 
         blur = cv2.GaussianBlur(img_l_eye,(5,5),0)
         ret,thresh1 = cv2.threshold(blur,55,255,cv2.THRESH_BINARY)
@@ -187,6 +209,7 @@ tracker = pupil_tracker
 while True:
     _, frame = cap.read()
     print(tracker.detect_in_frame(frame))
+   
 
 
 while False:
