@@ -4,6 +4,7 @@
 - openCV
 - Numpy
 - PySimpleGUI
+- Dlib
 
 ## To do:
 
@@ -30,6 +31,21 @@
 - openCV library is written as cv2
 - numpy library is written as np
 - PySimpleGUI library is written as sg
+
+## Installation
+
+Clone this project:
+
+```shell
+git clone https://github.com/sarif200/pool-project-experiment
+```
+
+### For Pip install
+Install these dependencies (NumPy, OpenCV, Dlib, PySimpleGUI):
+
+```shell
+pip install -r requirements.txt
+```
 
 ## Manual
 1. Open the main file
