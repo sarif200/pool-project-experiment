@@ -17,6 +17,26 @@ def createFolder():
 
     os.mkdir(final_path)
     print("Directory '% s' created" % foldername)
-    cycle_images()
+    startWindow()
 
     return foldername
+
+def startWindow():
+
+    layout = [
+        [sg.Text('Klik op start om te starten!')],
+        [sg.Button('Start', key="Start")]
+    ]
+
+    window = sg.Window("Window", layout)
+
+    while True:
+        event, values = window.read()
+        if event == "Start"
+            cycle_images()
+            time.sleep(1)
+            break
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+    
+    window.close()
