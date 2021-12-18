@@ -1,19 +1,17 @@
-# pool-project-experiment
+# Pool-project-experiment
 
 ## dependencies
-- opencv2
-- numpy
+- openCV
+- Numpy
 - PySimpleGUI
 
 ## To do:
 
 ### User Interface
-- [ ] Calibration Window
-- [ ] Settings Window
-- [ ] Screen size dropdownbox
-- [ ] Camera Frame Rate & Camera resolution dropdown box
+- [ ] Calibration
 - [ ] Export & import video
-- [ ] Screen capture & Camera Capture
+- [ ] Camera Capture
+- [x] Create folder
 - [x] Timer
 - [x] Image Slideshow
 
@@ -27,3 +25,20 @@
 
 - mark when going from one cordinate system to an other with 
   -- "#--------transform to ****** space------------"
+  
+- All time units are mesured in ms
+- openCV library is written as cv2
+- numpy library is written as np
+- PySimpleGUI library is written as sg
+
+## Manual
+1. Open the main file
+2. Select New Project
+3. Fill project name in
+4. Complete Calibration
+5. Images are shown
+6. Navigate to results page
+7. Open folder
+8. Video is projected on screen
+
+## Explanation
