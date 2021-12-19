@@ -31,6 +31,7 @@
 - openCV library is written as cv2
 - numpy library is written as np
 - PySimpleGUI library is written as sg
+- all interfaces with SystemDefaultForReal theme
 
 ## Installation
 
