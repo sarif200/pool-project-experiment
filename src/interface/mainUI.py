@@ -6,11 +6,16 @@ from settings import SettingsWindow
 
 # Main window
 def main():
+    
+    sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
+    
+    # Add Layout
     layout = [
         [sg.Text("Project Eye Tracking"), sg.Button("New Project", key=("new_project")), sg.Button("Show Results", key=("show_results")), sg.Button("Settings", key=("settings"))],
         [sg.HorizontalSeparator()],
     ]
-
+    
+    # Create window & evenloop
     window = sg.Window("Main Window", layout, size=(800, 600)).Finalize()
 
     while True:
