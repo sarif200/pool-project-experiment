@@ -6,7 +6,6 @@ from settings import SettingsWindow
 
 # Main window
 def main():
-    
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
     
     # Add Layout
