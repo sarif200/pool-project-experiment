@@ -16,7 +16,7 @@ import os
 
 
 filename = './src/assets/video.mp4'
-filename = './src/assets/WIN_20211217_21_18_07_Pro.mp4'
+#filename = './src/assets/WIN_20211217_21_18_07_Pro.mp4'
 
 if filename == '':
     filename = 0
@@ -31,15 +31,18 @@ if (cap.isOpened()== False):
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./src/assets/shape_predictor_68_face_landmarks.dat')
 
-params = cv2.SimpleBlobDetector_Params()
+detector_params = cv2.SimpleBlobDetector_Params()
 
-params.minThreshold = 0
+detector_params.minThreshold = 0
 
-params.filterByConvexity = False
-params.minConvexity = 0.1
+detector_params.filterByArea = True
+detector_params.maxArea = 1500
+
+detector_params.filterByConvexity = False
+detector_params.minConvexity = 0.1
 
 
-blob_detector = cv2.SimpleBlobDetector_create(params)
+blob_detector = cv2.SimpleBlobDetector_create(detector_params)
 
 
 left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
@@ -108,15 +111,21 @@ class pupil_tracker:
     def detect_pupil(eye,backup): # backup is a point that is returned by a calc pupil func
 
         # edit the images so it the blob detector wil work better
-        blur = cv2.GaussianBlur(eye,(5,5),0)
-        ret,thresh1 = cv2.threshold(blur,45,255,cv2.THRESH_BINARY)
+        inverted = np.invert(eye)
+        blur = cv2.GaussianBlur(eye,(9,9),0)
+        ret,thresh1 = cv2.threshold(blur,55,255,cv2.THRESH_BINARY)
         kernel = np.ones((2,2),np.uint8)
         erosion = cv2.erode(thresh1,kernel,iterations = 1)
+        closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, kernel)
         
-        cv2.imshow("test",erosion)
+
+        #contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        #cv2.drawContours(erosion, contours, -1, (0,255,0), 3)
+        cv2.imshow("test",closing)
+        #print(hierarchy)
         #im_tresh = cut_eyebrows(img_l_eye)
         #blob detection 
-        pupil = blob_detector.detect(erosion)
+        pupil = blob_detector.detect(closing)
         #im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         #if no blobs are found we  return the backup
@@ -179,13 +188,13 @@ class pupil_tracker:
         img_l_eye = gray[center_top_l[1]:center_bottom_l[1],landmarks.part(36).x:landmarks.part(39).x]
         img_r_eye = gray[center_top_r[1]:center_bottom_r[1],landmarks.part(42).x:landmarks.part(45).x]
 
-        backup_l = self.calc_pupil(landmarks,left)
-        backup_r = self.calc_pupil(landmarks,right)
+        backup_l_global = self.calc_pupil(landmarks,left)
+        backup_r_global = self.calc_pupil(landmarks,right)
         #--------transform to eye space------------
         #backup_l = (abs(backup_l[0]-landmarks.part(36).x),abs(backup_l[1]-center_top_l[1])) 
         #backup_r = (abs(backup_r[0]-landmarks.part(42).x),abs(backup_r[1]-center_top_r[1])) 
-        backup_l = abs_tuples(subtract_tuples(backup_l,(landmarks.part(36).x,center_top_l[1])))
-        backup_r = abs_tuples(subtract_tuples(backup_r,(landmarks.part(42).x,center_top_r[1])))
+        backup_l = abs_tuples(subtract_tuples(backup_l_global,(landmarks.part(36).x,center_top_l[1])))
+        backup_r = abs_tuples(subtract_tuples(backup_r_global,(landmarks.part(42).x,center_top_r[1])))
         
         pupil_l = self.detect_pupil(img_l_eye,backup_l)
         pupil_r = self.detect_pupil(img_r_eye,backup_r)
@@ -194,32 +203,8 @@ class pupil_tracker:
         pupil_l = add_tuples(pupil_l,(landmarks.part(36).x,center_top_l[1]))
         pupil_r = add_tuples(pupil_r,(landmarks.part(42).x,center_top_r[1]))
         
-        #blur = cv2.GaussianBlur(img_l_eye,(5,5),0)
-        #ret,thresh1 = cv2.threshold(blur,55,255,cv2.THRESH_BINARY)
-        #kernel = np.ones((2,2),np.uint8)
-        #erosion = cv2.erode(thresh1,kernel,iterations = 1)
-        
-        
-        #im_tresh = cut_eyebrows(img_l_eye)
-        #pupil = blob_detector.detect(erosion)
-        #im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-        #if len(pupil) ==0:
-            #return calc_pupil(landmarks,left)
-
-        #for keyPoint in pupil:
-            #x = keyPoint.pt[0]
-            #y = keyPoint.pt[1]
-            #--------transform to full screen------------
-            #x += landmarks.part(36).x 
-            #y += center_top[1]
-            #s = keyPoint.size
-            #cv2.circle(frame,(int(x),int(y)),10,(0,255,0),3)
-
-
-        #print(pupil)
-
-        #cv2.imshow("Frame",erosion )
+        print(backup_l_global,backup_r_global)
+        print(pupil_l,pupil_r)
         
         return pupil_l,pupil_r
 
@@ -229,7 +214,7 @@ while True:
     _, frame = cap.read()
     
     pupils = tracker.detect_in_frame(tracker,frame)
-    print(pupils)
+    #print(pupils)
     cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
     cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
     cv2.imshow("Frame",frame )
