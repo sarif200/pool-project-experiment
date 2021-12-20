@@ -3,9 +3,7 @@ import PySimpleGUI as sg
 import os, io
 import cv2
 import numpy as np
-
-def openFolder():
-    pass
+from videoPlayer import VideoPlayer
 
 # Open New Window
 def resultsWindow():
@@ -21,17 +19,16 @@ def resultsWindow():
     print(orgvideo_location)
 
     cap = cv2.VideoCapture(orgvideo_location)
-    
-    num_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    fps = cap.get(cv2.CAP_PROP_FPS)
 
-    end_frame = num_frames
-    start_frame = 0
+    screen_width = 500
+    screen_height = 300
+    screenSize = (screen_width, screen_height)
 
-    stop_flg = False
-
-    if (cap.isOpened()==False):
-        print("Error opening video file")
+    # App States
+    play = False
+    delay = 0.023
+    frame = 1
+    frames = None
 
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
 
@@ -39,33 +36,16 @@ def resultsWindow():
     # Tab group 1
     T1 = sg.Tab("Basic", [
         [
-            sg.Text("Resize     ", size=(13, 1)),
-            sg.Slider(
-                (0.1, 4),
-                1,
-                0.01,
-                orientation='h',
-                size=(40, 15),
-                key='-RESIZE SLIDER-',
-                enable_events=True
-            )
+            sg.Text("Open Tracked Video"),
+            sg.Button("Open", key="-OPEN TRACKED VID-")
         ],
         [
-            sg.Checkbox(
-                'blur',
-                size=(10, 1),
-                key='-BLUR-',
-                enable_events=True
-            ),
-            sg.Slider(
-                (1, 10),
-                1,
-                1,
-                orientation='h',
-                size=(40, 15),
-                key='-BLUR SLIDER-',
-                enable_events=True
-            )
+            sg.Text("Open Tracked Screen"),
+            sg.Button("Open", key="-OPEN TRACKED SCRN-")
+        ],
+        [
+            sg.Text("Open Timeline Screen"),
+            sg.Button("Open", key="-OPEN TIMELINE SCRN-")
         ],
     ])
 
@@ -83,57 +63,6 @@ def resultsWindow():
 
     # Tabgroup 3
     T3 = sg.Tab("mask", [
-    #   [
-    #         sg.Text(
-    #             'Show Original Video'
-    #         ),
-    #         sg.Checkbox(
-    #             key='-ORIGINAL-',
-    #             size=(8, 1)
-    #         )
-    #     ],
-    #     [
-    #         sg.Text(
-    #             'Show Mask Video'
-    #         ),
-    #         sg.Checkbox(
-    #             key='-MASKING-',
-    #             size=(8, 1),
-    #           default=True
-    #         )
-    #     ],
-    #     [
-    #         sg.Text(
-    #             'Show Display'
-    #         ),
-    #         sg.Checkbox(
-    #             key='-DISPLAY-',
-    #             size=(8, 1)
-    #         )
-    #     ],
-    #     [
-    #         sg.Checkbox(
-    #             "Blue",
-    #             size=(10, 1),
-    #             default=True,
-    #             key='-BLUE_MASK-',
-    #             enable_events=True
-    #         ),
-    #         sg.Checkbox(
-    #             "Green",
-    #             size=(10, 1),
-    #             default=True,
-    #             key='-GREEN_MASK-',
-    #             enable_events=True
-    #         ),
-    #         sg.Checkbox(
-    #             "Red",
-    #             size=(10, 1),
-    #             default=True,
-    #             key='-RED_MASK-',
-    #             enable_events=True
-    #         )
-    #     ],
         [
             sg.Text(
                 'hsv',
@@ -242,14 +171,13 @@ def resultsWindow():
         ]
     ])
 
-    
-    layout = [
+    left_col = [
         [
             sg.Text("Timeline", size=(8,1)),
             sg.Slider(
                 orientation="horizontal",
                 key="-PROGRESS SLIDER-",
-                range=(1,num_frames),
+                range=(1,100),
                 size=(45,15),
                 default_value=0
             )
@@ -290,141 +218,82 @@ def resultsWindow():
             )
         ],
         [sg.Output(size=(65, 5), key='-OUTPUT-')],
+    ]
+
+    vid_col = [
+        [
+            sg.Text('Original Video')
+        ],
+        [
+            sg.Canvas(size=(500, 300), key="org_canvas", background_color="black")
+        ],
+                [
+            sg.Text('Tracked Video')
+        ],
+        [
+            sg.Canvas(size=(500, 300), key="tracked_canvas", background_color="black")
+        ]
+    ]
+
+    scrn_col = [
+        [
+            sg.Text('Tracked Screen')
+        ],
+        [
+            sg.Canvas(size=(500, 300), key="tracked_scrn_canvas", background_color="black")
+        ],
+                [
+            sg.Text('Screen Timeline')
+        ],
+        [
+            sg.Canvas(size=(500, 300), key="scrn_timeline_canvas", background_color="black")
+        ]
+    ]
+
+    layout = [
+        [sg.Column(left_col, element_justification='c'), sg.VSeparator(), sg.Column(vid_col, element_justification='c'), sg.VSeparator(), sg.Column(scrn_col, element_justification='c')],
         [sg.Button('Clear'), sg.Button('Close', key="Exit")]
     ]
 
-    window = sg.Window("Results", layout)
+    window = sg.Window("Results", layout, resizable=True)
+    
+    canvas = window.Element("org_canvas")
 
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+
+        # Get Video Frame
+        ret, frameOrg = cap.read()
+        frame = cv2.resize(frameOrg, screenSize)
+
+        print("succesfully started")
+
+        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
+        window["org_canvas"].update(data=imgbytes)
+
+        # org_vid = VideoPlayer(orgvideo_location)
+        # org_vid_width = 500
+        # org_vid_height = int(org_vid_width * org_vid_height / org_vid_width)
+
+        # frames = int(org_vid.frames)
+
+        # window.Element('-PROGRESS SLIDER-').Update(range=(0, int(frames)), value=0)
+
+        # canvas.config(width=org_vid_width)
+
+        # frame = 0
+        # delay = 1 / org_vid.fps
+
+        # if event == "Play / Stop":
+        #     if play:
+        #         play = False
+        #     else:
+        #         play = True
         
-        ret, frame = cap.read()
+        # if event == "-PROGRESS SLIDER-":
+        #     pass
         
-        cv2.imshow('Frame', frame)
-    
-    cap.release()
-    cv2.destroyAllWindow()
+
     window.close()
-
-    
-
-
-    # try:
-    #     while True:
-    #         event, values = window.read()
-    #         if event == "Exit" or event == sg.WIN_CLOSED:
-    #             break
-            
-    #         ret, frame = vidFile.read()
-    #         if not ret:  # if out of data stop looping
-    #             break
-
-    #         # Move Slider
-    #         if event == '-PROGRESS SLIDER-':
-    #             #Set the frame count to the progress bar
-    #             frame_count = int(values['-PROGRESS SLIDER-'])
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-    #             if values['-PROGRESS SLIDER-'] > values['-END FRAME SLIDER-']:
-    #                 window['-END FRAME SLIDER-'].update(
-    #                     values['-PROGRESS SLIDER-'])
-
-    #         if event == '<<<':
-    #                 frame_count = np.maximum(0, frame_count - 150)
-    #                 window['-PROGRESS SLIDER-'].update(frame_count)
-    #                 vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         if event == '<<':
-    #             frame_count = np.maximum(0, frame_count - 30)
-    #             window['-PROGRESS SLIDER-'].update(frame_count)
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         if event == '<':
-    #             frame_count = np.maximum(0, frame_count - 1)
-    #             window['-PROGRESS SLIDER-'].update(frame_count)
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         if event == '>':
-    #             frame_count = frame_count + 1
-    #             window['-PROGRESS SLIDER-'].update(frame_count)
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         if event == '>>':
-    #             frame_count = frame_count + 30
-    #             window['-PROGRESS SLIDER-'].update(frame_count)
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         if event == '>>>':
-    #             frame_count = frame_count + 150
-    #             window['-PROGRESS SLIDER-'].update(frame_count)
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         #If the counter exceeds the end frame, restart from the start frame
-    #         if frame_count >= end_frame:
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, start_frame)
-    #             frame_count = start_frame
-    #             window['-PROGRESS SLIDER-'].update(frame_count)
-    #             continue
-        
-    #         if event == 'Play / Stop':
-    #                 stop_flg = not stop_flg
-
-    #         # if(
-    #         #     (
-    #         #         stop_flg
-    #         #         and event == "__TIMEOUT__"
-    #         #         and mouse_flg is False
-    #         #     )
-    #         # ):
-    #         #     window['-PROGRESS SLIDER-'].update(frame_count)
-    #         #     continue
-
-    #         #Load frame
-    #         ret, frame = vidFile.read()
-    #         valid_frame = int(frame_count - start_frame)
-    #         #Self when the last frame is over.s_Resume from frame
-    #         if not ret:
-    #             vidFile.set(cv.CAP_PROP_POS_FRAMES, start_frame)
-    #             frame_count = start_frame
-    #             continue
-
-    #         # if values['-MASKING-']:
-    #         #     # Masks
-    #         #     #Display image
-    #         #         if values['-MASKING-']:
-    #         #             cv.imshow("Mask", cv.cvtColor(mask, cv.COLOR_GRAY2BGR))
-    #         #             cv.setWindowProperty("Mask", cv.WND_PROP_VISIBLE, 0)
-    #         #         elif not values['-MASKING-'] and cv.getWindowProperty("Mask", cv.WND_PROP_VISIBLE):
-    #         #             cv.destroyWindow("Mask")
-
-    #         #         if stop_flg:
-    #         #             vidFile.set(cv.CAP_PROP_POS_FRAMES, frame_count)
-
-    #         #         else:
-    #         #             frame_count += 1
-    #         #             window['-PROGRESS SLIDER-'].update(frame_count + 1)
-
-    #         #         #Other processing###############################################
-    #         #         #Clear log window
-    #         #         if event == 'Clear':
-    #         #             window['-OUTPUT-'].update('')
-            
-    #         # if values['-DISPLAY-']:
-    #         #   # Display screen recording with projection
-    #         #   cv.imshow("Display", frame)
-    #         #   # function tracking with imput filename
-    #         # elif not values['-DISPLAY-'] and cv.getWindowProperty("Display", cv.WND_PROP_VISIBLE):
-    #         #   cv.destroyWindow("Display")
-            
-    #         # if values['-ORIGINAL-']:
-    #         #   # Original Video
-    #         #   cv.imshow("Original", frame)
-    #         # elif not values['-ORIGINAL-'] and cv.getWindowProperty("Original", cv.WND_PROP_VISIBLE):
-    #         #   cv.destroyWindow("Original")
-
-    # finally:
-    #     cv.destroyWindow("Movie")
-    #     cv.destroyWindow("Mask")
-    #     vidFile.release()
-    #     window.close()
