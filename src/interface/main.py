@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 from results import resultsWindow
 from calibration import calibrationWindow
-from create_new_project import createFolder
+from new_project import createFolder
 from settings import SettingsWindow
 
 # Main window
@@ -16,7 +16,7 @@ def main():
     ]
     
     # Create window & evenloop
-    window = sg.Window("Main Window", layout, size=(800, 600)).Finalize()
+    window = sg.Window("Main Window", layout, size=(500, 550)).Finalize()
 
     while True:
         event, values = window.read()

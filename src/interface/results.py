@@ -8,13 +8,23 @@ file_types = [("GIF (*.gif)", "*.gif"),
                 ("MP4 (*.mp4)", "*.mp4"),
               ("All files (*.*)", "*.*")]
 
+def openFolder():
+    pass
+
 # Open New Window
 def resultsWindow():
-    filename = sg.popup_get_file('Filename to play')
+    folder_location = sg.popup_get_folder('Open Project Folder')
+    orgvidname = "original_video.mp4"
 
-    if filename is None:
+    if folder_location is None:
         return
-    vidFile = cv.VideoCapture(filename)
+        
+    finalfolder = os.path.abspath(folder_location)
+    orgvideo_location = os.path.join(finalfolder, orgvidname)
+
+    print(orgvideo_location)
+
+    vidFile = cv.VideoCapture(orgvideo_location)
     
     num_frames = vidFile.get(cv.CAP_PROP_FRAME_COUNT)
     fps = vidFile.get(cv.CAP_PROP_FPS)
@@ -23,6 +33,8 @@ def resultsWindow():
     s_frame = 0
 
     stop_flg = False
+
+    sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
 
     # Layout
     # Tab group 1
@@ -72,57 +84,57 @@ def resultsWindow():
 
     # Tabgroup 3
     T3 = sg.Tab("mask", [
-      [
-            sg.Text(
-                'Show Original Video'
-            ),
-            sg.Checkbox(
-                key='-ORIGINAL-',
-                size=(8, 1)
-            )
-        ],
-        [
-            sg.Text(
-                'Show Mask Video'
-            ),
-            sg.Checkbox(
-                key='-MASKING-',
-                size=(8, 1),
-              default=True
-            )
-        ],
-        [
-            sg.Text(
-                'Show Display'
-            ),
-            sg.Checkbox(
-                key='-DISPLAY-',
-                size=(8, 1)
-            )
-        ],
-        [
-            sg.Checkbox(
-                "Blue",
-                size=(10, 1),
-                default=True,
-                key='-BLUE_MASK-',
-                enable_events=True
-            ),
-            sg.Checkbox(
-                "Green",
-                size=(10, 1),
-                default=True,
-                key='-GREEN_MASK-',
-                enable_events=True
-            ),
-            sg.Checkbox(
-                "Red",
-                size=(10, 1),
-                default=True,
-                key='-RED_MASK-',
-                enable_events=True
-            )
-        ],
+    #   [
+    #         sg.Text(
+    #             'Show Original Video'
+    #         ),
+    #         sg.Checkbox(
+    #             key='-ORIGINAL-',
+    #             size=(8, 1)
+    #         )
+    #     ],
+    #     [
+    #         sg.Text(
+    #             'Show Mask Video'
+    #         ),
+    #         sg.Checkbox(
+    #             key='-MASKING-',
+    #             size=(8, 1),
+    #           default=True
+    #         )
+    #     ],
+    #     [
+    #         sg.Text(
+    #             'Show Display'
+    #         ),
+    #         sg.Checkbox(
+    #             key='-DISPLAY-',
+    #             size=(8, 1)
+    #         )
+    #     ],
+    #     [
+    #         sg.Checkbox(
+    #             "Blue",
+    #             size=(10, 1),
+    #             default=True,
+    #             key='-BLUE_MASK-',
+    #             enable_events=True
+    #         ),
+    #         sg.Checkbox(
+    #             "Green",
+    #             size=(10, 1),
+    #             default=True,
+    #             key='-GREEN_MASK-',
+    #             enable_events=True
+    #         ),
+    #         sg.Checkbox(
+    #             "Red",
+    #             size=(10, 1),
+    #             default=True,
+    #             key='-RED_MASK-',
+    #             enable_events=True
+    #         )
+    #     ],
         [
             sg.Text(
                 'hsv',

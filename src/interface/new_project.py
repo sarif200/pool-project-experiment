@@ -22,8 +22,7 @@ def createFolder():
     os.mkdir(final_folder_path)
     print("Directory '% s' created" % foldername)
     
-    # Return folder path for later use
-    return final_folder_path
+
 
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
     
@@ -38,11 +37,13 @@ def createFolder():
 
     while True:
         event, values = window.read()
-        if event == "Start"
+        if event == "Start":
+            window.close()
             cycle_images()
-            time.sleep(1)
-            break
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     
     window.close()
+
+    # Return folder path for later use
+    return final_folder_path
