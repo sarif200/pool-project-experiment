@@ -18,6 +18,7 @@ def resultsWindow():
     print(orgvideo_location)
 
     cap = cv2.VideoCapture(orgvideo_location)
+    cap1 = cv2.VideoCapture(orgvideo_location)
 
     screen_width = 500
     screen_height = 300
@@ -25,6 +26,9 @@ def resultsWindow():
 
     num_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     fps = cap.get(cv2.CAP_PROP_FPS)
+
+    num_frames = cap1.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps = cap1.get(cv2.CAP_PROP_FPS)
 
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
 
@@ -236,7 +240,7 @@ def resultsWindow():
             sg.Text('Tracked Screen')
         ],
         [
-            sg.Canvas(size=(500, 300), key="tracked_scrn_canvas", background_color="black")
+            sg.Image(size=(500, 300), key="tracked_scrn_canvas")
         ],
                 [
             sg.Text('Screen Timeline')
@@ -254,6 +258,7 @@ def resultsWindow():
     window = sg.Window("Results", layout, resizable=True)
     
     original_video_frame = window.Element("org_canvas")
+    screen_video_frame =  window.Element("tracked_scrn_canvas")
     progessSlider = window.Element('-PROGRESS SLIDER-')
 
     cur_frame = 0
@@ -261,19 +266,34 @@ def resultsWindow():
         event, values = window.read(timeout=0)
         if event in ('Exit', None):
             break
+
+        if event == "-OPEN TRACKED VID-":
+            # Tracking class
+            pass
+
+        if event == "-OPEN TRACKED SCRN-":
+            # Open Screen video & track
+            pass
+        
         ret, frame = cap.read()
+        ret1, frame1 = cap1.read()
         frame = cv2.resize(frame, screenSize)
-        if not ret:  # if out of data stop looping
+        frame1 = cv2.resize(frame1, screenSize)
+        if not ret and not ret1:  # if out of data stop looping
             cur_frame = 0
         # if someone moved the slider manually, the jump to that frame
         if int(values['-PROGRESS SLIDER-']) != cur_frame-1:
             cur_frame = int(values['-PROGRESS SLIDER-'])
             cap.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
+            cap1.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
         progessSlider.update(cur_frame)
         cur_frame += 1
 
         imgbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
         original_video_frame.update(data=imgbytes)
+
+        imgbytes1 = cv2.imencode('.png', frame1)[1].tobytes()  # ditto
+        screen_video_frame.update(data=imgbytes1)
         
     cap.release()
     window.close()

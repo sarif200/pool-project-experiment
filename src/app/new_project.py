@@ -3,7 +3,6 @@ import os
 from experiment import cycle_images
 
 def createFolder():
-    
     # Get New Folder Name
     foldername = sg.popup_get_text("Project Name")
     if foldername is None:
