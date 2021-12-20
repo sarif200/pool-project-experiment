@@ -3,7 +3,6 @@ import PySimpleGUI as sg
 import os, io
 import cv2
 import numpy as np
-from videoPlayer import VideoPlayer
 
 # Open New Window
 def resultsWindow():
@@ -24,11 +23,8 @@ def resultsWindow():
     screen_height = 300
     screenSize = (screen_width, screen_height)
 
-    # App States
-    play = False
-    delay = 0.023
-    frame = 1
-    frames = None
+    num_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps = cap.get(cv2.CAP_PROP_FPS)
 
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
 
@@ -177,7 +173,7 @@ def resultsWindow():
             sg.Slider(
                 orientation="horizontal",
                 key="-PROGRESS SLIDER-",
-                range=(1,100),
+                range=(0,num_frames),
                 size=(45,15),
                 default_value=0
             )
@@ -217,7 +213,7 @@ def resultsWindow():
                 tab_location="topleft"
             )
         ],
-        [sg.Output(size=(65, 5), key='-OUTPUT-')],
+        [sg.Output(size=(65, 10), key='-OUTPUT-')],
     ]
 
     vid_col = [
@@ -225,7 +221,7 @@ def resultsWindow():
             sg.Text('Original Video')
         ],
         [
-            sg.Canvas(size=(500, 300), key="org_canvas", background_color="black")
+            sg.Image(filename='', size=(500, 300), key="org_canvas")
         ],
                 [
             sg.Text('Tracked Video')
@@ -257,43 +253,27 @@ def resultsWindow():
 
     window = sg.Window("Results", layout, resizable=True)
     
-    canvas = window.Element("org_canvas")
+    original_video_frame = window.Element("org_canvas")
+    progessSlider = window.Element('-PROGRESS SLIDER-')
 
-    while True:
-        event, values = window.read()
-        if event == "Exit" or event == sg.WIN_CLOSED:
+    cur_frame = 0
+    while cap.isOpened():
+        event, values = window.read(timeout=0)
+        if event in ('Exit', None):
             break
+        ret, frame = cap.read()
+        frame = cv2.resize(frame, screenSize)
+        if not ret:  # if out of data stop looping
+            cur_frame = 0
+        # if someone moved the slider manually, the jump to that frame
+        if int(values['-PROGRESS SLIDER-']) != cur_frame-1:
+            cur_frame = int(values['-PROGRESS SLIDER-'])
+            cap.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
+        progessSlider.update(cur_frame)
+        cur_frame += 1
 
-        # Get Video Frame
-        ret, frameOrg = cap.read()
-        frame = cv2.resize(frameOrg, screenSize)
-
-        print("succesfully started")
-
-        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
-        window["org_canvas"].update(data=imgbytes)
-
-        # org_vid = VideoPlayer(orgvideo_location)
-        # org_vid_width = 500
-        # org_vid_height = int(org_vid_width * org_vid_height / org_vid_width)
-
-        # frames = int(org_vid.frames)
-
-        # window.Element('-PROGRESS SLIDER-').Update(range=(0, int(frames)), value=0)
-
-        # canvas.config(width=org_vid_width)
-
-        # frame = 0
-        # delay = 1 / org_vid.fps
-
-        # if event == "Play / Stop":
-        #     if play:
-        #         play = False
-        #     else:
-        #         play = True
+        imgbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
+        original_video_frame.update(data=imgbytes)
         
-        # if event == "-PROGRESS SLIDER-":
-        #     pass
-        
-
+    cap.release()
     window.close()
