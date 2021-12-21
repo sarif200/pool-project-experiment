@@ -10,7 +10,7 @@ def main():
     
     # Add Layout
     layout = [
-        [sg.Text("Project Eye Tracking"), sg.Button("New Project", key=("new_project")), sg.Button("Show Results", key=("show_results")), sg.Button("Settings", key=("settings"))],
+        [sg.Text("Project Eye Tracking"), sg.Button("New Project", key=("new_project")), sg.Button("Open Project", key=("open_project")), sg.Button("Settings", key=("settings"))],
         [sg.HorizontalSeparator()],
     ]
     
@@ -21,7 +21,7 @@ def main():
         event, values = window.read()
         if  event == sg.WIN_CLOSED:
             break
-        if event == "show_results":
+        if event == "open_project":
             resultsWindow()
         if event == "calibrate":
             calibrationWindow()
