@@ -17,6 +17,7 @@ import os
 
 filename = './src/assets/video.mp4'
 #filename = './src/assets/WIN_20211217_21_18_07_Pro.mp4'
+filename = 0
 
 if filename == '':
     filename = 0
@@ -42,7 +43,7 @@ detector_params.filterByConvexity = False
 detector_params.minConvexity = 0.1
 
 
-blob_detector = cv2.SimpleBlobDetector_create(detector_params)
+#blob_detector = cv2.SimpleBlobDetector_create(detector_params)
 
 
 left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
@@ -107,25 +108,35 @@ class pupil_tracker:
             y_sum += landmarks.part(i).y
         coord = (int(x_sum/len(side)),int(y_sum/len(side)))
         return coord
-    #this wil find and return the most probable place of the pupil 
-    def detect_pupil(eye,backup): # backup is a point that is returned by a calc pupil func
 
-        # edit the images so it the blob detector wil work better
-        inverted = np.invert(eye)
-        blur = cv2.GaussianBlur(eye,(9,9),0)
-        ret,thresh1 = cv2.threshold(blur,55,255,cv2.THRESH_BINARY)
+
+    def image_blob_detection(self,image):
+        blur = cv2.GaussianBlur(image,(9,9),0)
+        ret,thresh1 = cv2.threshold(blur,30,255,cv2.THRESH_BINARY)
         kernel = np.ones((2,2),np.uint8)
         erosion = cv2.erode(thresh1,kernel,iterations = 1)
-        closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, kernel)
+        return self.blob_detector.detect(erosion)
+    
+    #this wil find and return the most probable place of the pupil 
+    def detect_pupil(self,eye,backup): # backup is a point that is returned by a calc pupil func
+
+        # edit the images so it the blob detector wil work better
+        #inverted = np.invert(eye)
+        #blur = cv2.GaussianBlur(eye,(9,9),0)
+        #ret,thresh1 = cv2.threshold(blur,5,255,cv2.THRESH_BINARY)
+        #kernel = np.ones((2,2),np.uint8)
+        #erosion = cv2.erode(thresh1,kernel,iterations = 1)
+        #closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, kernel)
         
 
         #contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         #cv2.drawContours(erosion, contours, -1, (0,255,0), 3)
-        cv2.imshow("test",closing)
+        #cv2.imshow("test",erosion)
         #print(hierarchy)
         #im_tresh = cut_eyebrows(img_l_eye)
         #blob detection 
-        pupil = blob_detector.detect(closing)
+        pupil = self.blob_detector.detect(eye)
+        
         #im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         #if no blobs are found we  return the backup
@@ -196,8 +207,8 @@ class pupil_tracker:
         backup_l = abs_tuples(subtract_tuples(backup_l_global,(landmarks.part(36).x,center_top_l[1])))
         backup_r = abs_tuples(subtract_tuples(backup_r_global,(landmarks.part(42).x,center_top_r[1])))
         
-        pupil_l = self.detect_pupil(img_l_eye,backup_l)
-        pupil_r = self.detect_pupil(img_r_eye,backup_r)
+        pupil_l = self.detect_pupil(self,img_l_eye,backup_l)
+        pupil_r = self.detect_pupil(self,img_r_eye,backup_r)
 
         #--------transform to screen space------------
         pupil_l = add_tuples(pupil_l,(landmarks.part(36).x,center_top_l[1]))
