@@ -16,8 +16,8 @@ def cycle_images():
     print(images)
 
     # # Count files in folder
-    # img_length = len(images)
-    # print(img_length)
+    count = len(images)
+    print(count)
 
     for image in images:
         img_path = os.path.join(img_folder, image)

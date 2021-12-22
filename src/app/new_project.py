@@ -21,8 +21,6 @@ def createFolder():
     os.mkdir(final_folder_path)
     print("Directory '% s' created" % foldername)
     
-
-
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
     
     # Add layout
