@@ -112,9 +112,10 @@ class pupil_tracker:
 
     def image_blob_detection(self,image):
         blur = cv2.GaussianBlur(image,(9,9),0)
-        ret,thresh1 = cv2.threshold(blur,30,255,cv2.THRESH_BINARY)
+        ret,thresh1 = cv2.threshold(blur,8,255,cv2.THRESH_BINARY)
         kernel = np.ones((2,2),np.uint8)
         erosion = cv2.erode(thresh1,kernel,iterations = 1)
+        cv2.imshow("test",erosion)
         return self.blob_detector.detect(erosion)
     
     #this wil find and return the most probable place of the pupil 
@@ -135,7 +136,7 @@ class pupil_tracker:
         #print(hierarchy)
         #im_tresh = cut_eyebrows(img_l_eye)
         #blob detection 
-        pupil = self.blob_detector.detect(eye)
+        pupil = self.image_blob_detection(self,eye)
         
         #im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
