@@ -22,7 +22,7 @@ filename = 0
 if filename == '':
     filename = 0
 
-cap = cv2.VideoCapture(filename)
+cap = cv2.VideoCapture(filename, cv2.CAP_DSHOW)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
