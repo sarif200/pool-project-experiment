@@ -2,33 +2,70 @@ import cv2
 import os
 
 def cycle_images():
+    # Get file path from current data directory
+    foldername = "Test" # Get foldername from new_project file
+    filename = "original_video.avi"
+    scriptDir = os.path.dirname(__file__)
+    currentdir_folder = os.path.join(scriptDir, '../data/', foldername, filename)
+    project_folder = os.path.abspath(currentdir_folder)
+
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+    # Video Codec
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    output = cv2.VideoWriter(project_folder, fourcc, 20.0, (640, 480))
+    get_images()
+    while True:
+        ret, frame = cap.read()
+        if ret:
+            output.write(frame)
+            cv2.imshow('frame', frame)
+        else:
+            print("Can't receive frame (stream end?). Exiting ...")
+            break
+
+        if cv2.waitKey == 27: #if ESC is pressed, exit loop
+            cv2.destroyAllWindows()
+            break
+
+    cap.release()
+    output.release()
+    cv2.destroyAllWindows()
+
+def get_images():
     TIME = 3
     t = TIME * 1000 # transform to miliseconds
 
     # Get file path
     scriptDir = os.path.dirname(__file__)
-    dir_folder = os.path.join(scriptDir, '../img/')
-    img_folder = os.path.abspath(dir_folder)
-    print(img_folder)
-
+    imgdir_folder = os.path.join(scriptDir, '../img/')
+    img_folder = os.path.abspath(imgdir_folder)
     # Get files from folder
     images = os.listdir(img_folder)
-    print(images)
+    # print(images)
 
-    # # Count files in folder
-    count = len(images)
-    print(count)
+    cnt = len(images)
+    idx = 0
+    while True:
+        img_path = os.path.join(img_folder, images[idx])
+        remaining_img = int(cnt - idx)
+        print("Images remaining: " +  str(remaining_img) + " out of " + str(cnt), end="\r")
+        img = cv2.imread(img_path)
 
-    for image in images:
-        img_path = os.path.join(img_folder, image)
-        print(img_path)
-        img = cv2.imread(img_path, 0)
-        cv2.namedWindow("Image", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("Image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        cv2.imshow('Image', img)
-        key = cv2.waitKey(t) # is miliseconds
-        if key == 27: #if ESC is pressed, exit loop
-            cv2.destroyAllWindows()
+        cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.imshow('Display', img)
+
+        if cv2.waitKey(1000) >= 0:
             break
 
+        idx += 1
+        if idx >= cnt:
+            break
+
+        if cv2.waitKey == 27: #if ESC is pressed, exit loop
+            cv2.destroyAllWindows()
+            break
     cv2.destroyAllWindows()
+
+cycle_images()
