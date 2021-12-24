@@ -27,7 +27,7 @@
 - mark when going from one cordinate system to an other with 
   -- "#--------transform to ****** space------------"
   
-- All time units are mesured in ms
+- All time units are measured in ms
 - openCV library is written as cv2
 - numpy library is written as np
 - PySimpleGUI library is written as sg
