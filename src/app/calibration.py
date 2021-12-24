@@ -8,21 +8,20 @@ import time
 # Input
 camera_ID = 0
 
-width = 1000
-height = 500
-offset = (100, 80)
+width = 950
+height = 1300
+offset = (70, 110)
+
+
+
+# size_screen = (camera.get(cv2.CAP_PROP_FRAME_HEIGHT), camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+size_screen = (1920, 1080)
+calibration_page = make_white_page(size = size_screen)
 
 def calibration():
+    foldername = "Test"
     # Initialize
     camera = init_camera(camera_ID = camera_ID)
-
-    # size_screen = (camera.get(cv2.CAP_PROP_FRAME_HEIGHT), camera.get(cv2.CAP_PROP_FRAME_WIDTH))
-    size_screen = (1920, 1080)
-
-    calibration_page = make_white_page(size = size_screen)
-
-    resize_eye_frame = 4.5 # scaling factor for window's size
-    resize_frame = 0.3 # scaling factor for window's size
 
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("./src/assets/shape_predictor_68_face_landmarks.dat")
@@ -45,7 +44,7 @@ def calibration():
         gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
 
         # messages for calibration
-        cv2.putText(calibration_page, 'Calibration: look at the circle and press the a key', tuple((np.array(size_screen)/7).astype('int')), cv2.FONT_HERSHEY_SIMPLEX, 1.5,(0, 0, 255), 3)
+        # cv2.putText(calibration_page, 'Calibration: look at the circle and press the a key', tuple((np.array(size_screen)/15).astype('int')), cv2.FONT_HERSHEY_SIMPLEX, 1.5,(0, 0, 255), 3)
         cv2.circle(calibration_page, corners[corner], 40, (0, 255, 0), -1)
 
         # detect faces in frame
@@ -73,9 +72,7 @@ def calibration():
 
             # visualize message
             cv2.putText(calibration_page, 'ok',
-                        tuple(np.array(corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(255, 255, 255), 5)
-            # to avoid is_blinking=True in the next frame
-            time.sleep(0.3)
+                        tuple(np.array(corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
             corner += 1
 
         # print(calibration_cut, '    len: ', len(calibration_cut))
@@ -85,6 +82,13 @@ def calibration():
         if cv2.waitKey(113) == ord('q'):
             break
 
+    # Process calibration
+    x_cut_min, x_cut_max, y_cut_min, y_cut_max = find_cut_limits(calibration_cut)
+    offset_calibrated_cut = [ x_cut_min, y_cut_min ]
+
+    save_calibration(foldername, offset_calibrated_cut)
+
+    print('Calibration Finished')
     cv2.destroyAllWindows()
 
 calibration()

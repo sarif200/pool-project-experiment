@@ -1,4 +1,4 @@
-# UI for calibration
+# Functions for calibration
 import os
 import cv2
 import numpy as np
@@ -53,3 +53,22 @@ def display_face_points(img, landmarks, points_to_draw, color):
         x = landmarks.part(point).x
         y = landmarks.part(point).y
         cv2.circle(img, (x, y), 4, dict_color[color], 2)
+
+def find_cut_limits(calibration_cut):
+    x_cut_max = np.transpose(np.array(calibration_cut))[0].max()
+    x_cut_min = np.transpose(np.array(calibration_cut))[0].min()
+    y_cut_max = np.transpose(np.array(calibration_cut))[1].max()
+    y_cut_min = np.transpose(np.array(calibration_cut))[1].min()
+
+    return x_cut_min, x_cut_max, y_cut_min, y_cut_max
+
+def save_calibration(foldername, offset_calibrated_cut):
+    filename = "offset.txt"
+    scriptDir = os.path.dirname(__file__)
+    currentdir_folder = os.path.join(scriptDir, '../data/', foldername, filename)
+    file = os.path.abspath(currentdir_folder)
+    document = open(file, "a+") # Will open & create if file is not found
+
+    document.write(str(offset_calibrated_cut))
+
+    print("Succesfully writed to file")
