@@ -9,8 +9,8 @@
 ## To do:
 
 ### User Interface
-- [ ] Calibration
-- [ ] Export & import video
+- [x] Calibration
+- [x] Export & import video
 - [ ] Camera Capture
 - [x] Create folder
 - [x] Timer
