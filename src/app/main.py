@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from results import resultsWindow
-from calibration import calibrationWindow
+from calibration import calibration
 from new_project import createFolder
 from settings import SettingsWindow
 
@@ -36,8 +36,6 @@ def main():
             break
         if event == "open_project":
             resultsWindow()
-        if event == "calibrate":
-            calibrationWindow()
         if event == "new_project":
             createFolder()
         if event == "settings":

@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 import os
-from experiment import cycle_images
+from calibration import calibration
 
 def createFolder():
     # Get New Folder Name
@@ -25,8 +25,8 @@ def createFolder():
     
     # Add layout
     layout = [
-        [sg.Text('Klik op start om te starten!')],
-        [sg.Button('Start', key="Start")]
+        [sg.Text('Calibratie vereist om te starten!')],
+        [sg.Button('Calibreer', key="calibrate")]
     ]
     
     # Create window & event loop
@@ -34,13 +34,13 @@ def createFolder():
 
     while True:
         event, values = window.read()
-        if event == "Start":
+        if event == "calibrate":
             window.close()
-            cycle_images()
+            calibration(foldername)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     
     window.close()
 
     # Return folder path for later use
-    return final_folder_path
+    return final_folder_path, foldername

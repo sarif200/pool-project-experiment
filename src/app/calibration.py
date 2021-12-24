@@ -3,7 +3,8 @@ from calibrationFunctions import *
 import dlib
 import cv2
 import sys
-import time
+import PySimpleGUI as sg
+from experiment import cycle_images
 
 # Input
 camera_ID = 0
@@ -12,14 +13,12 @@ width = 950
 height = 1300
 offset = (70, 110)
 
-
-
 # size_screen = (camera.get(cv2.CAP_PROP_FRAME_HEIGHT), camera.get(cv2.CAP_PROP_FRAME_WIDTH))
 size_screen = (1920, 1080)
 calibration_page = make_white_page(size = size_screen)
 
-def calibration():
-    foldername = "Test"
+def calibration(foldername):
+    # foldername = "Test"
     # Initialize
     camera = init_camera(camera_ID = camera_ID)
 
@@ -90,5 +89,26 @@ def calibration():
 
     print('Calibration Finished')
     cv2.destroyAllWindows()
+    start_message()
 
-calibration()
+def start_message():
+    sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
+    
+    # Add layout
+    layout = [
+        [sg.Text('Calibratie succesvol! Klik op start om te starten!')],
+        [sg.Button('Start', key="Start")]
+    ]
+    
+    # Create window & event loop
+    window = sg.Window("Titel", layout)
+
+    while True:
+        event, values = window.read()
+        if event == "Start":
+            window.close()
+            cycle_images()
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+    
+    window.close()
