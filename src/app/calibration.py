@@ -6,6 +6,8 @@ import sys
 import PySimpleGUI as sg
 from experiment import cycle_images
 
+# used https://github.com/michemingway/eye-writing-easy
+
 # Input
 camera_ID = 0
 
