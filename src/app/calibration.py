@@ -11,12 +11,12 @@ from experiment import cycle_images
 # Input
 camera_ID = 0
 
-width = 950
-height = 1300
-offset = (70, 110)
+width = 1860
+height = 1020
+offset = (30, 30)
 
 # size_screen = (camera.get(cv2.CAP_PROP_FRAME_HEIGHT), camera.get(cv2.CAP_PROP_FRAME_WIDTH))
-size_screen = (1920, 1080)
+size_screen = (1080, 1920)
 calibration_page = make_white_page(size = size_screen)
 
 def calibration(foldername):
