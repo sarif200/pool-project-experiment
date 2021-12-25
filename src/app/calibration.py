@@ -5,18 +5,23 @@ import cv2
 import sys
 import PySimpleGUI as sg
 from experiment import cycle_images
+import ctypes
 
 # used https://github.com/michemingway/eye-writing-easy
 
 # Input
 camera_ID = 0
 
+# Config
 width = 1860
 height = 1020
 offset = (30, 30)
 
-# size_screen = (camera.get(cv2.CAP_PROP_FRAME_HEIGHT), camera.get(cv2.CAP_PROP_FRAME_WIDTH))
-size_screen = (1080, 1920)
+user32 = ctypes.windll.user32
+size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+
+print(size_screen)
+# size_screen = (1080, 1920)
 calibration_page = make_white_page(size = size_screen)
 
 def calibration(foldername):
@@ -44,8 +49,7 @@ def calibration(foldername):
 
         gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
 
-        # messages for calibration
-        # cv2.putText(calibration_page, 'Calibration: look at the circle and press the a key', tuple((np.array(size_screen)/15).astype('int')), cv2.FONT_HERSHEY_SIMPLEX, 1.5,(0, 0, 255), 3)
+        # draw circle
         cv2.circle(calibration_page, corners[corner], 40, (0, 255, 0), -1)
 
         # detect faces in frame
@@ -55,10 +59,7 @@ def calibration(foldername):
             sys.exit()
 
         for face in faces:
-            # display_box_around_face(frame, [face.left(), face.top(), face.right(), face.bottom()], 'green', (20, 40))
-
             landmarks = predictor(gray_scale_frame, face) # find points in face
-            # display_face_points(frame, landmarks, [0, 68], color='red') # draw face points
 
             # get position of right eye and display lines
             right_eye_coordinates = get_eye_coordinates(landmarks, [42, 43, 44, 45, 46, 47])
@@ -76,6 +77,7 @@ def calibration(foldername):
                         tuple(np.array(corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
             corner += 1
 
+        # Display results
         # print(calibration_cut, '    len: ', len(calibration_cut))
         show_window('projection', calibration_page)
         # show_window('frame', cv2.resize(frame,  (640, 360)))
