@@ -24,8 +24,7 @@ print(size_screen)
 # size_screen = (1080, 1920)
 calibration_page = make_white_page(size = size_screen)
 
-def calibration(foldername):
-    # foldername = "Test"
+def calibration(final_folder_path, foldername):
     # Initialize
     camera = init_camera(camera_ID = camera_ID)
 
@@ -93,9 +92,9 @@ def calibration(foldername):
 
     print('Calibration Finished')
     cv2.destroyAllWindows()
-    start_message()
+    start_message(final_folder_path)
 
-def start_message():
+def start_message(final_folder_path):
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
     
     # Add layout
@@ -111,7 +110,7 @@ def start_message():
         event, values = window.read()
         if event == "Start":
             window.close()
-            cycle_images()
+            cycle_images(final_folder_path)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     

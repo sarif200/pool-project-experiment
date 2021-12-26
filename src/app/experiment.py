@@ -9,12 +9,10 @@ def show_image(img_path):
     cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow('Display', img)
 
-def cycle_images():
+def cycle_images(final_folder_path):
     # Get file path from current data directory
-    foldername = "Test" # Get foldername from new_project file
     filename = "original_video.avi"
-    scriptDir = os.path.dirname(__file__)
-    currentdir_folder = os.path.join(scriptDir, '../data/', foldername, filename)
+    currentdir_folder = os.path.join(final_folder_path, filename)
     project_folder = os.path.abspath(currentdir_folder)
 
     TIME = 3
@@ -66,5 +64,3 @@ def cycle_images():
     cap.release()
     output.release()
     cv2.destroyAllWindows()
-
-cycle_images()

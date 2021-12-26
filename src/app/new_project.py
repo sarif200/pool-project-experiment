@@ -36,7 +36,7 @@ def createFolder():
         event, values = window.read()
         if event == "calibrate":
             window.close()
-            calibration(foldername)
+            calibration(final_folder_path, foldername)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     
