@@ -1,6 +1,4 @@
 # Import libraries
-from threading import current_thread
-from tkinter.constants import N
 import PySimpleGUI as sg
 import os
 import cv2
