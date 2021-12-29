@@ -11,13 +11,13 @@
 ### User Interface
 - [x] Calibration
 - [x] Export & import video
-- [ ] Camera Capture
+- [x] Camera Capture
 - [x] Create folder
 - [x] Timer
 - [x] Image Slideshow
 
 ### Program
-- [ ] Main Eye tracking
+- [x] Main Eye tracking
 - [ ] Screen projection
 - [ ] After & live processing
 - [ ] global class to store fault data(like when the blobdetector doesn't find a blob)
@@ -47,6 +47,7 @@ Install these dependencies (NumPy, OpenCV, Dlib, PySimpleGUI):
 ```shell
 pip install -r requirements.txt
 ```
+CMake is required for this project.
 
 ## Manual
 1. Open the main file
