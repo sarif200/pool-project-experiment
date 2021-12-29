@@ -17,7 +17,7 @@
 - [x] Image Slideshow
 
 ### Program
-- [ ] Main Eye tracking
+- [x] Main Eye tracking
 - [ ] Screen projection
 - [ ] After & live processing
 - [ ] global class to store fault data(like when the blobdetector doesn't find a blob)
