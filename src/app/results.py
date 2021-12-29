@@ -1,4 +1,5 @@
 # Import libraries
+from functools import total_ordering
 import PySimpleGUI as sg
 import os, time
 import cv2
@@ -6,7 +7,6 @@ import numpy as np
 
 # Open New Window
 def resultsWindow():
-    TIME = 3 # Time between images
 
     # Get Folder Location
     folder_location = sg.popup_get_folder('Open Project Folder')
@@ -26,7 +26,7 @@ def resultsWindow():
     offset = document.read()
     print(offset)
 
-    print(orgvideo_location)
+    # print(orgvideo_location)
 
     cap = cv2.VideoCapture(orgvideo_location)
 
@@ -38,6 +38,7 @@ def resultsWindow():
     fps = cap.get(cv2.CAP_PROP_FPS)
 
     total_length = int(fps * num_frames)
+    total_length_sec = int(total_length / 60)
 
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
 
@@ -45,17 +46,41 @@ def resultsWindow():
     # Tab group 1
     T1 = sg.Tab("Basic", [
         [
-            sg.Text("Open Tracked Video"),
-            sg.Button("Open", key="-OPEN TRACKED VID-")
+            sg.Text(
+                'Project Name: '
+            ),
+            sg.Text(
+                '',
+                key='-PROJECT NAME-'
+            )
         ],
         [
-            sg.Text("Open Tracked Screen"),
-            sg.Button("Open", key="-OPEN TRACKED SCRN-")
+            sg.Text(
+                'FPS: '
+            ),
+            sg.Text(
+                '',
+                key='-FPS-'
+            )
         ],
         [
-            sg.Text("Open Timeline Screen"),
-            sg.Button("Open", key="-OPEN TIMELINE SCRN-")
+            sg.Text(
+                'Screen Size: '
+            ),
+            sg.Text(
+                '',
+                key='-SCREEN SIZE-'
+            )
         ],
+                [
+            sg.Text(
+                'Total Time (s): '
+            ),
+            sg.Text(
+                '',
+                key='-TIME-'
+            )
+        ]
     ])
 
     # Tabgroup 2
@@ -226,7 +251,7 @@ def resultsWindow():
                 tab_location="topleft"
             )
         ],
-        [sg.Output(size=(65, 10), key='-OUTPUT-')],
+        [sg.Output(size=(65, 15), key='-OUTPUT-')],
     ]
 
     vid_col = [
@@ -264,30 +289,36 @@ def resultsWindow():
         [sg.Button('Clear'), sg.Button('Close', key="Exit")]
     ]
 
-    window = sg.Window("Results", layout, resizable=True)
+    window = sg.Window("Results: " + folder_location, layout, resizable=True).finalize()
     
+    # UI var
     original_video_frame = window.Element("org_canvas")
     screen_video_frame =  window.Element("tracked_scrn_canvas")
     progessSlider = window.Element('-PROGRESS SLIDER-')
     speedSlider = window.Element('-SPEED SLIDER-')
 
+    # Const & presets
     cur_frame = 0
     speed = 1
     video_stop = True
+    TIME = 3 # Time between images
+
+    # Update project information
+    window.Element('-FPS-').update(fps)
+    window.Element('-SCREEN SIZE-').update(screenSize)
+    window.Element('-TIME-').update(total_length_sec)
+
+    # Calculate frames
+    interval = int(fps * TIME)
 
     while True: 
         event, values = window.read(timeout=0)
         if event in ('Exit', None):
             break
-
-        if event == "-OPEN TRACKED VID-":
-            # Tracking class
-            pass
         
         ret, frame = cap.read()
 
         frame = cv2.resize(frame, screenSize)
-
 
         if not ret:  # if out of data stop looping
             cur_frame = 0
@@ -302,7 +333,7 @@ def resultsWindow():
         if int(values['-SPEED SLIDER-']) != speed:
             speed = int(values['-SPEED SLIDER-'])
             speedSlider.update(speed)
-            print(speed)
+            # print(speed) #ok
         
         if event == 'Play / Stop':
             video_stop = not video_stop
@@ -342,9 +373,37 @@ def resultsWindow():
         if event == '>>>':
             pass
 
-        # Screen
-        if (cur_frame < 10):
-            pass
+        # Screen if between x and y show image 1
+        if (cur_frame < interval):
+            # Print image 1
+            print("1")
+
+        elif (interval < cur_frame < 2 * interval):
+            print("2")
+
+        elif (2 * interval < cur_frame < 3 * interval):
+            print("3")
+
+        elif (3 * interval < cur_frame < 4 * interval):
+            print("4")
+
+        elif (4 * interval < cur_frame < 5 * interval):
+            print("5")
+
+        elif (5 * interval < cur_frame < 6 * interval):
+            print("6")
+
+        elif (6 * interval < cur_frame < 7 * interval):
+            print("7")
+        
+        elif (7 * interval < cur_frame < 8 * interval):
+            print("8")
+        
+        elif (8 * interval < cur_frame < 9 * interval):
+            print("9")
+        
+        elif (9 * interval < cur_frame < total_length_sec):
+            print("10")
 
         imgbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
         original_video_frame.update(data=imgbytes)
