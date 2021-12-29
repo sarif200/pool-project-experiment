@@ -1,15 +1,17 @@
 # Import libraries
 import PySimpleGUI as sg
 import os, time
-from PySimpleGUI.PySimpleGUI import PROGRESS_BAR_STYLES
 import cv2
 import numpy as np
 
 # Open New Window
 def resultsWindow():
+    TIME = 3 # Time between images
+
     # Get Folder Location
     folder_location = sg.popup_get_folder('Open Project Folder')
     orgvidname = "original_video.mp4"
+    textfile = "offset.txt"
 
     if folder_location is None:
         return
@@ -17,18 +19,16 @@ def resultsWindow():
     finalfolder = os.path.abspath(folder_location)
     orgvideo_location = os.path.join(finalfolder, orgvidname)
 
+    file_location = os.path.join(finalfolder, textfile)
+
+    # Read textfile with offset
+    document = open(file_location, "r") # Will open & create if file is not found
+    offset = document.read()
+    print(offset)
+
     print(orgvideo_location)
 
-    # Get location of directory
-    scriptDir = os.path.dirname(__file__)
-    dir_folder = os.path.join(scriptDir, '../assets')
-    assets_folder = os.path.abspath(dir_folder)
-    screen_video = "video.mp4"
-
-    screen_video_path = os.path.join(assets_folder, screen_video)
-
     cap = cv2.VideoCapture(orgvideo_location)
-    cap1 = cv2.VideoCapture(screen_video_path)
 
     screen_width = 500
     screen_height = 300
@@ -37,8 +37,7 @@ def resultsWindow():
     num_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     fps = cap.get(cv2.CAP_PROP_FPS)
 
-    num_frames = cap1.get(cv2.CAP_PROP_FRAME_COUNT)
-    fps = cap1.get(cv2.CAP_PROP_FPS)
+    total_length = int(fps * num_frames)
 
     sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
 
@@ -270,11 +269,13 @@ def resultsWindow():
     original_video_frame = window.Element("org_canvas")
     screen_video_frame =  window.Element("tracked_scrn_canvas")
     progessSlider = window.Element('-PROGRESS SLIDER-')
+    speedSlider = window.Element('-SPEED SLIDER-')
 
     cur_frame = 0
+    speed = 1
     video_stop = True
 
-    while True:      
+    while True: 
         event, values = window.read(timeout=0)
         if event in ('Exit', None):
             break
@@ -284,44 +285,72 @@ def resultsWindow():
             pass
         
         ret, frame = cap.read()
-        ret1, frame1 = cap1.read()
-        frame = cv2.resize(frame, screenSize)
-        frame1 = cv2.resize(frame1, screenSize)
 
-        if not ret and not ret1:  # if out of data stop looping
+        frame = cv2.resize(frame, screenSize)
+
+
+        if not ret:  # if out of data stop looping
             cur_frame = 0
 
-        # if someone moved the slider manually, the jump to that frame
+        # Button Events
         if int(values['-PROGRESS SLIDER-']) != cur_frame-1:
             cur_frame = int(values['-PROGRESS SLIDER-'])
             cap.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
-            cap1.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
-
             progessSlider.update(cur_frame)
-            cur_frame += 1
+            cur_frame += 1 * speed
+
+        if int(values['-SPEED SLIDER-']) != speed:
+            speed = int(values['-SPEED SLIDER-'])
+            speedSlider.update(speed)
+            print(speed)
         
         if event == 'Play / Stop':
             video_stop = not video_stop
 
         if video_stop:
             cap.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
-            cap1.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
 
         else:
             cur_frame += 1
-            progessSlider.update(cur_frame + 1)
+            progessSlider.update(cur_frame + 1 * speed)
 
         if event == 'Reset':
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            cap1.set(cv2.CAP_PROP_POS_FRAMES, 0)
             progessSlider.update(0)
+            speed = 1
+            speedSlider.update(1)
+
+        if event == '<':
+            cur_frame -= 6
+            progessSlider.update(cur_frame)
+        
+        if event == '<<':
+            cur_frame -= 11
+            progessSlider.update(cur_frame)
+        
+        if event == '<<<':
+            pass
+
+        if event == '>':
+            cur_frame += 4
+            progessSlider.update(cur_frame)
+
+        if event == '>>':
+            cur_frame += 9
+            progessSlider.update(cur_frame)
+
+        if event == '>>>':
+            pass
+
+        # Screen
+        if (cur_frame < 10):
+            pass
 
         imgbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
         original_video_frame.update(data=imgbytes)
-
-        imgbytes1 = cv2.imencode('.png', frame1)[1].tobytes()  # ditto
-        screen_video_frame.update(data=imgbytes1)
         
     cap.release()
-    cap1.release()
+    # cap1.release()
     window.close()
+
+resultsWindow()
