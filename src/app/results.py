@@ -1,9 +1,9 @@
 # Import libraries
-from functools import total_ordering
+from threading import current_thread
+from tkinter.constants import N
 import PySimpleGUI as sg
-import os, time
+import os
 import cv2
-import numpy as np
 
 # Open New Window
 def resultsWindow():
@@ -27,6 +27,13 @@ def resultsWindow():
     print(offset)
 
     # print(orgvideo_location)
+
+    scriptDir = os.path.dirname(__file__)
+    imgdir_folder = os.path.join(scriptDir, '../img/')
+    img_folder = os.path.abspath(imgdir_folder)
+
+    # Get images from folder
+    images = os.listdir(img_folder)
 
     cap = cv2.VideoCapture(orgvideo_location)
 
@@ -302,6 +309,7 @@ def resultsWindow():
     speed = 1
     video_stop = True
     TIME = 3 # Time between images
+    n = 0
 
     # Update project information
     window.Element('-FPS-').update(fps)
@@ -313,7 +321,7 @@ def resultsWindow():
 
     while True: 
         event, values = window.read(timeout=0)
-        if event in ('Exit', None):
+        if event == ('Exit', None):
             break
         
         ret, frame = cap.read()
@@ -373,43 +381,18 @@ def resultsWindow():
         if event == '>>>':
             pass
 
-        # Screen if between x and y show image 1
-        if (cur_frame < interval):
-            # Print image 1
-            print("1")
+        # Screen projection
+        # Loop true n
+        # Get the current frame, if between frame x & y show image n
+        for n in range(10):
+            if (n * interval < cur_frame < (n+1) * interval):
+                current_image = images[n]
+                print(n, current_image)
 
-        elif (interval < cur_frame < 2 * interval):
-            print("2")
-
-        elif (2 * interval < cur_frame < 3 * interval):
-            print("3")
-
-        elif (3 * interval < cur_frame < 4 * interval):
-            print("4")
-
-        elif (4 * interval < cur_frame < 5 * interval):
-            print("5")
-
-        elif (5 * interval < cur_frame < 6 * interval):
-            print("6")
-
-        elif (6 * interval < cur_frame < 7 * interval):
-            print("7")
-        
-        elif (7 * interval < cur_frame < 8 * interval):
-            print("8")
-        
-        elif (8 * interval < cur_frame < 9 * interval):
-            print("9")
-        
-        elif (9 * interval < cur_frame < total_length_sec):
-            print("10")
-
-        imgbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
-        original_video_frame.update(data=imgbytes)
+        vidbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
+        original_video_frame.update(data=vidbytes)
         
     cap.release()
-    # cap1.release()
     window.close()
 
 resultsWindow()
