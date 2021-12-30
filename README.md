@@ -60,3 +60,22 @@ CMake is required for this project.
 8. Video is projected on screen
 
 ## Explanation
+### main.py
+- Line 1-5: Import of libraries & functions from other files.
+- Line 8: Define the function.
+- Line 9: Set theme for the UI.
+- Line 10-28: Here we define the layout for the UI.
+- Line 30-31: Here we define the window with the window title and the layout.
+- Line 33-43: We define the event loop and listen to all the event and execute the actions.
+- Line 44: When out of the event loop, close the window.
+- Line 46-47: When file is ran, execute the main function.
+
+### new_project.py
+
+### calibration.py
+
+### experiment.py
+
+### results.py
+
+### tracking.py
