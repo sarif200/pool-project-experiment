@@ -1,4 +1,5 @@
 # Import libraries
+
 import PySimpleGUI as sg
 import os
 import cv2
@@ -217,18 +218,18 @@ def resultsWindow():
                 orientation="horizontal",
                 key="-PROGRESS SLIDER-",
                 range=(0,num_frames),
-                size=(45,15),
+                size=(44,15),
                 default_value=0
             )
         ],
         [
-            sg.Text("Speed", size=(6,1)),
+            sg.Text("Speed: ", size=(8,1)),
             sg.Slider(
                 orientation="horizontal",
                 key="-SPEED SLIDER-",
-                resolution=0.1,
-                range=(0,2),
-                default_value=1,
+                resolution=1,
+                range=(0,20),
+                default_value=10,
                 size=(45, 15)
             )
         ],
@@ -334,12 +335,12 @@ def resultsWindow():
             cur_frame = int(values['-PROGRESS SLIDER-'])
             cap.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
             progessSlider.update(cur_frame)
-            cur_frame += 1 * speed
+            cur_frame += 1 * (speed-1)
 
-        if int(values['-SPEED SLIDER-']) != speed:
-            speed = int(values['-SPEED SLIDER-'])
-            speedSlider.update(speed)
-            # print(speed) #ok
+        if int(values['-SPEED SLIDER-']) != 10:
+            speed = int(values['-SPEED SLIDER-']) / 10
+            speedSlider.update(speed * 10)
+            print(speed) #ok
         
         if event == 'Play / Stop':
             video_stop = not video_stop
@@ -349,13 +350,13 @@ def resultsWindow():
 
         else:
             cur_frame += 1
-            progessSlider.update(cur_frame + 1 * speed)
+            progessSlider.update(cur_frame + 1 * (speed-1))
 
         if event == 'Reset':
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             progessSlider.update(0)
             speed = 1
-            speedSlider.update(1)
+            speedSlider.update(10)
 
         if event == '<':
             cur_frame -= 6
@@ -385,7 +386,9 @@ def resultsWindow():
         for n in range(10):
             if (n * interval < cur_frame < (n+1) * interval):
                 current_image = images[n]
-                print(n, current_image)
+                # print(n, current_image)
+
+        print(speed)
 
         vidbytes = cv2.imencode('.png', frame)[1].tobytes()  # ditto
         original_video_frame.update(data=vidbytes)
