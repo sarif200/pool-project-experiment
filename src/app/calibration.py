@@ -90,6 +90,7 @@ def calibration(final_folder_path, foldername):
 
     save_calibration(foldername, offset_calibrated_cut)
 
+    camera.release()
     print('Calibration Finished')
     cv2.destroyAllWindows()
     start_message(final_folder_path)
