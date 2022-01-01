@@ -30,9 +30,11 @@ def cycle_images(final_folder_path):
     idx = 1
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+    fps = 30
+
     # Video Codec
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output = cv2.VideoWriter(project_folder, fourcc, 20.0, (640, 480))
+    output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
     
     prev_time = time.time()
     delta_since_last_change = 0

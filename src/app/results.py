@@ -13,7 +13,7 @@ def resultsWindow():
 
     # Get Folder Location
     folder_location = sg.popup_get_folder('Open Project Folder')
-    orgvidname = "original_video.mp4"
+    orgvidname = "original_video.avi"
     textfile = "offset.txt"
 
     if folder_location is None:
