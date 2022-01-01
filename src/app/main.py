@@ -1,6 +1,5 @@
 import PySimpleGUI as sg
 from results import resultsWindow
-from calibration import calibration
 from new_project import createFolder
 from settings import SettingsWindow
 
