@@ -1,12 +1,12 @@
 # Import libraries
 import PySimpleGUI as sg
+import numpy as np
 import os
 import cv2
 import sys
 
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# from tracking import pupil_tracker
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tracking import pupil_tracker
 
 # Open New Window
 def resultsWindow():
@@ -289,7 +289,7 @@ def resultsWindow():
     # Calculate frames
     interval = int(fps * TIME)
 
-    # tracker = pupil_tracker
+    tracker = pupil_tracker
 
     while True: 
         event, values = window.read(timeout=0)
@@ -357,33 +357,27 @@ def resultsWindow():
         cv2.imshow("Original video", frame)
 
         # Show tracked video
-        # pupils = tracker.detect_in_frame(tracker,frame_tracked, offset)
-        # #print(pupils)
-        # cv2.circle(frame_tracked,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-        # cv2.circle(frame_tracked,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+        pupils = tracker.detect_in_frame(tracker,frame_tracked)
+        # print(pupils)
+        cv2.circle(frame_tracked,(int(pupils[0][0]),int(pupils[0][1])),10,(0, 255, 0),3)
+        cv2.circle(frame_tracked,(int(pupils[1][0]),int(pupils[1][1])),10,(255, 0, 0),3)
 
         cv2.imshow('Tracked video', frame_tracked)
 
         # Screen projection
         # Loop true n
         # Get the current frame, if between frame x & y show image n
-
-        # pupil_l_on_frame = np.mean([pupils[0][0], pupils[0][1]], axis = 0).astype('int')
-        # pupil_r_on_frame = np.mean([pupils[1][0], pupils[1][1]], axis = 0).astype('int') 
-
         for n in range(10):
             if (n * interval < cur_frame < (n+1) * interval):
                 current_image = images[n]
                 img_path = os.path.join(img_folder, current_image)
                 img = cv2.imread(img_path)
-                # cv2.circle(img, (pupil_l_on_frame[0], pupil_l_on_frame[1]), 1, (30, 0, 255), 3)
-                # cv2.circle(img, (pupil_r_on_frame[0], pupil_r_on_frame[1]), 1, (0, 255, 30), 3)
-                # img = cv2.resizeWindow(img, (640, 480))
+                cv2.resize(img, (640, 480))
+                cv2.circle(img, (int(pupils[0][0]),int(pupils[0][1])), 10, (0, 255, 0), 3)
+                cv2.circle(img, (int(pupils[1][0]),int(pupils[1][1])), 10, (255, 0, 0), 3)
                 cv2.imshow("Image", img)
               
         
     cap.release()
     cv2.destroyAllWindows()
     window.close()
-
-resultsWindow()
