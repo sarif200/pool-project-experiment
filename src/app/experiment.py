@@ -30,7 +30,7 @@ def cycle_images(final_folder_path):
     idx = 1
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-    fps = 30
+    fps = 15
 
     # Video Codec
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -60,7 +60,8 @@ def cycle_images(final_folder_path):
             show_image(img_path)
             idx += 1 if idx < cnt else 10
 
-        if cv2.waitKey(113) == ord('q'):
+        key = cv2.waitKey(1)
+        if key == 27:
             break
 
     cap.release()
