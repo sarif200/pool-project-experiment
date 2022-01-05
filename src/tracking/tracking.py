@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import dlib
 import os 
+import ctypes
 
 # used https://github.com/MCodez/PUPIL-Detection-using-OpenCV
 
@@ -13,11 +14,12 @@ import os
 
 # l = left (-x) and r = right (+x) 
 
-
+print(os.path.dirname(__file__))
 
 filename = './src/assets/video.mp4'
+filename = './assets/video.mp4'
 #filename = './src/assets/WIN_20211217_21_18_07_Pro.mp4'
-filename = 0
+#filename = 0
 
 if filename == '':
     filename = 0
@@ -48,7 +50,7 @@ detector_params.minConvexity = 0.1
 
 left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
 right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
-
+'''
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
@@ -76,7 +78,7 @@ def add_tuples(tuple1,tuple2):
 
 def abs_tuples(tuple):
     return (abs(tuple[0]),abs(tuple[1]))
-
+'''
 class pupil_tracker:
     left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
@@ -180,13 +182,16 @@ class pupil_tracker:
         faces = detector(gray)
         if len(faces) ==0:
             return ((0,0),(0,0))
-        for face in faces:
+        if len(faces)> 1:
+            print('Please avoid multiple faces.')
+            sys.exit()
+        #for face in faces:
             #x, y = face.left(), face.top()
             #x1, y1 = face.right(), face.bottom()
             #cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
-            pass
+            #pass
 
-        landmarks = predictor(gray, face)
+        landmarks = predictor(gray, face[0])
         #left_point = (landmarks.part(36).x, landmarks.part(36).y)
         #right_point = (landmarks.part(39).x, landmarks.part(39).y)
 
@@ -220,19 +225,123 @@ class pupil_tracker:
         
         return pupil_l,pupil_r
 
-tracker = pupil_tracker
 
-# while True:
-#     _, frame = cap.read()
+
+class gaze_tracker:
+    pupilTracker = pupil_tracker
+    width = 1860
+    height = 1020
+    offset = (30, 30)
+
+    user32 = ctypes.windll.user32
+    size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+
+    calibration_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+
+    # Calibration
+    corners = [
+        (offset), # Point 1
+        (width + offset[0], height + offset[1]), # Point 2
+        (width + offset[0], offset[1]), # Point 3
+        (offset[0], height + offset[1])  # Point 4
+    ]
     
-#     pupils = tracker.detect_in_frame(tracker,frame)
-#     #print(pupils)
-#     cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-#     cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
-#     cv2.imshow("Frame",frame )
-#     key = cv2.waitKey(1)
-#     if key == 27:
-#         break
+    
+    
+
+    def save_calibration(foldername, offset_calibrated_cut):
+        filename = "offset.txt"
+        scriptDir = os.path.dirname(__file__)
+        currentdir_folder = os.path.join(scriptDir, '../data/', foldername, filename)
+        file = os.path.abspath(currentdir_folder)
+        document = open(file, "a+") # Will open & create if file is not found
+
+        document.write(str(offset_calibrated_cut))
+
+        print("Succesfully writed to file")
+
+    def find_cut_limits(calibration_cut):
+        x_cut_max = np.transpose(np.array(calibration_cut))[0].max()
+        x_cut_min = np.transpose(np.array(calibration_cut))[0].min()
+        y_cut_max = np.transpose(np.array(calibration_cut))[1].max()
+        y_cut_min = np.transpose(np.array(calibration_cut))[1].min()
+
+        return x_cut_min, x_cut_max, y_cut_min, y_cut_max
+   
+
+
+        
+    def calibration(self,final_folder_path, foldername,camera_ID):
+        corner  = 0
+        calibration_cut_left = []
+        while (corner<len(self.corners)): # calibration of 4 corners
+
+            ret, frame = camera.read()   # Capture frame
+            frame = cv2.flip(frame, 1)  # flip camera sees things mirorred
+
+            #gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
+
+            # draw circle
+            cv2.circle(calibration_page, self.corners[corner], 40, (0, 255, 0), -1)
+
+            pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+
+            # detect faces in frame
+            faces = detector(gray_scale_frame)
+            if len(faces)> 1:
+                print('Please avoid multiple faces.')
+                sys.exit()
+
+            for face in faces:
+                landmarks = predictor(gray_scale_frame, face) # find points in face
+
+                # get position of right eye and display lines
+                right_eye_coordinates = get_eye_coordinates(landmarks, [42, 43, 44, 45, 46, 47])
+                display_eye_lines(frame, right_eye_coordinates, 'green')
+
+            # define the coordinates of the pupil from the centroid of the right eye
+            pupil_coordinates = np.mean([right_eye_coordinates[2], right_eye_coordinates[3]], axis = 0).astype('int')
+
+            if cv2.waitKey(33) == ord('a'):
+                calibration_cut.append(pupil_coordinates)
+                print(pupil_coordinates)
+
+                # visualize message
+                cv2.putText(calibration_page, 'ok',tuple(np.array(corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
+                corner += 1
+
+            # Display results
+            # print(calibration_cut, '    len: ', len(calibration_cut))
+            show_window('projection', calibration_page)
+            # show_window('frame', cv2.resize(frame,  (640, 360)))
+
+            if cv2.waitKey(113) == ord('q'):
+                break
+
+        # Process calibration
+        x_cut_min, x_cut_max, y_cut_min, y_cut_max = self.find_cut_limits(calibration_cut)
+        offset_calibrated_cut = [ x_cut_min, y_cut_min ]
+
+        self.save_calibration(foldername, offset_calibrated_cut)
+
+        camera.release()
+        print('Calibration Finished')
+        cv2.destroyAllWindows()
+        #start_message(final_folder_path)
+        
+
+tracker = pupil_tracker
+while True:
+     _, frame = cap.read()
+    
+     pupils = tracker.detect_in_frame(tracker,frame)
+     #print(pupils)
+     cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
+     cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+     cv2.imshow("Frame",frame )
+     key = cv2.waitKey(1)
+     if key == 27:
+         break
    
 
 
