@@ -3,6 +3,7 @@ import numpy as np
 import dlib
 import os 
 import ctypes
+import sys
 
 # used https://github.com/MCodez/PUPIL-Detection-using-OpenCV
 

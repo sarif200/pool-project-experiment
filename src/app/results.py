@@ -5,7 +5,11 @@ import os
 import cv2
 import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+scriptDir = os.path.dirname(__file__)
+tracking_folder = os.path.join(scriptDir, '../tracking')
+path = os.path.abspath(tracking_folder)
+
+sys.path.append(path)
 from tracking import pupil_tracker
 
 # Open New Window
@@ -210,6 +214,10 @@ def resultsWindow():
                 key='-CAPTION-',
                 enable_events=True
             )
+        ],
+        [
+            sg.Text('Heatmap:'),
+            sg.Button('Generate', size=(10,1), key="-HEATMAP-")
         ]
     ])
 
@@ -352,6 +360,9 @@ def resultsWindow():
 
         if event == '>>>':
             pass
+
+        if event == "-HEATMAP-":
+            createHeatMap()
         
         # Show original video
         cv2.imshow("Original video", frame)
@@ -381,3 +392,6 @@ def resultsWindow():
     cap.release()
     cv2.destroyAllWindows()
     window.close()
+
+def createHeatMap():
+    pass
