@@ -6,6 +6,10 @@
 - PySimpleGUI
 - Dlib
 
+## Known Issues:
+- [] last image on slideshow is displayed less then 3 seconds
+- [] when speed is less then 0.7 video stops
+
 ## To do:
 
 ### User Interface
