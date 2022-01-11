@@ -18,13 +18,13 @@ import sys
 print(os.path.dirname(__file__))
 
 filename = './src/assets/video.mp4'
-filename = './assets/video.mp4'
+filename = '../assets/video.mp4'
 #filename = './src/assets/WIN_20211217_21_18_07_Pro.mp4'
 #filename = 0
 
 if filename == '':
     filename = 0
-
+print(filename)
 cap = cv2.VideoCapture(filename, cv2.CAP_DSHOW)
 
 cap.set(cv2.CAP_PROP_FPS,60)
@@ -49,8 +49,8 @@ detector_params.minConvexity = 0.1
 #blob_detector = cv2.SimpleBlobDetector_create(detector_params)
 
 
-left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
-right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
+#left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
+#right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
 '''
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
@@ -206,8 +206,8 @@ class pupil_tracker:
         img_l_eye = gray[center_top_l[1]:center_bottom_l[1],landmarks.part(36).x:landmarks.part(39).x]
         img_r_eye = gray[center_top_r[1]:center_bottom_r[1],landmarks.part(42).x:landmarks.part(45).x]
 
-        backup_l_global = self.calc_pupil(landmarks,left)
-        backup_r_global = self.calc_pupil(landmarks,right)
+        backup_l_global = self.calc_pupil(landmarks,self.fleft)
+        backup_r_global = self.calc_pupil(landmarks,self.right)
         #--------transform to eye space------------
         #backup_l = (abs(backup_l[0]-landmarks.part(36).x),abs(backup_l[1]-center_top_l[1])) 
         #backup_r = (abs(backup_r[0]-landmarks.part(42).x),abs(backup_r[1]-center_top_r[1])) 
@@ -229,6 +229,7 @@ class pupil_tracker:
 
 
 class gaze_tracker:
+    
     pupilTracker = pupil_tracker
     width = 1860
     height = 1020
@@ -238,6 +239,9 @@ class gaze_tracker:
     size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
 
     calibration_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+
+    offset_calibrated_cut_left = []
+    offset_calibrated_cut_right = []
 
     # Calibration
     corners = [
@@ -250,16 +254,16 @@ class gaze_tracker:
     
     
 
-    def save_calibration(foldername, offset_calibrated_cut):
+    def save_calibration(foldername, offset_calibrated_cut_left,offset_calibrated_cut_right):
         filename = "offset.txt"
         scriptDir = os.path.dirname(__file__)
         currentdir_folder = os.path.join(scriptDir, '../data/', foldername, filename)
         file = os.path.abspath(currentdir_folder)
         document = open(file, "a+") # Will open & create if file is not found
 
-        document.write(str(offset_calibrated_cut))
+        document.write(str(offset_calibrated_cut_left))
 
-        print("Succesfully writed to file")
+        print("Succesfully writen to file")
 
     def find_cut_limits(calibration_cut):
         x_cut_max = np.transpose(np.array(calibration_cut))[0].max()
@@ -269,12 +273,16 @@ class gaze_tracker:
 
         return x_cut_min, x_cut_max, y_cut_min, y_cut_max
    
-
+    def offset_calibrated_cut(calibration_cut):
+        x_cut_min = np.transpose(np.array(calibration_cut))[0].min()
+        y_cut_min = np.transpose(np.array(calibration_cut))[1].min()
+        return x_cut_min,y_cut_min
 
         
     def calibration(self,final_folder_path, foldername,camera_ID):
         corner  = 0
         calibration_cut_left = []
+        calibration_cut_right = []
         while (corner<len(self.corners)): # calibration of 4 corners
 
             ret, frame = camera.read()   # Capture frame
@@ -286,7 +294,7 @@ class gaze_tracker:
             cv2.circle(calibration_page, self.corners[corner], 40, (0, 255, 0), -1)
 
             pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
-
+            '''
             # detect faces in frame
             faces = detector(gray_scale_frame)
             if len(faces)> 1:
@@ -297,18 +305,22 @@ class gaze_tracker:
                 landmarks = predictor(gray_scale_frame, face) # find points in face
 
                 # get position of right eye and display lines
-                right_eye_coordinates = get_eye_coordinates(landmarks, [42, 43, 44, 45, 46, 47])
+                #right_eye_coordinates = get_eye_coordinates(landmarks, [42, 43, 44, 45, 46, 47])
+                right_eye_coordinates = get_eye_coordinates(landmarks, self.pupilTracker.right)
                 display_eye_lines(frame, right_eye_coordinates, 'green')
 
             # define the coordinates of the pupil from the centroid of the right eye
             pupil_coordinates = np.mean([right_eye_coordinates[2], right_eye_coordinates[3]], axis = 0).astype('int')
+            '''
 
             if cv2.waitKey(33) == ord('a'):
-                calibration_cut.append(pupil_coordinates)
-                print(pupil_coordinates)
+                calibration_cut_left.append(pupils[0])
+                calibration_cut_right.append(pupils[1])
+                print(pupil)
 
                 # visualize message
                 cv2.putText(calibration_page, 'ok',tuple(np.array(corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
+                
                 corner += 1
 
             # Display results
@@ -323,12 +335,19 @@ class gaze_tracker:
         x_cut_min, x_cut_max, y_cut_min, y_cut_max = self.find_cut_limits(calibration_cut)
         offset_calibrated_cut = [ x_cut_min, y_cut_min ]
 
+        self.offset_calibrated_cut_left = self.offset_calibrated_cut(calibration_cut_left)
+        self.offset_calibrated_cut_right = self.offset_calibrated_cut(calibration_cut_right)
+
         self.save_calibration(foldername, offset_calibrated_cut)
 
         camera.release()
         print('Calibration Finished')
         cv2.destroyAllWindows()
         #start_message(final_folder_path)
+    def track(self,frame):
+        pass
+
+        
         
 
 tracker = pupil_tracker
@@ -336,7 +355,7 @@ while True:
      _, frame = cap.read()
     
      pupils = tracker.detect_in_frame(tracker,frame)
-     #print(pupils)
+     print(pupils)
      cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
      cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
      cv2.imshow("Frame",frame )
