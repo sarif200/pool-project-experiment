@@ -15,17 +15,17 @@ import sys
 
 # l = left (-x) and r = right (+x) 
 
-print(os.path.dirname(__file__))
-
-filename = './src/assets/video.mp4'
-filename = '../assets/video.mp4'
-#filename = './src/assets/WIN_20211217_21_18_07_Pro.mp4'
-#filename = 0
+filename = 'video.mp4'
 
 if filename == '':
     filename = 0
-print(filename)
-cap = cv2.VideoCapture(filename, cv2.CAP_DSHOW)
+else:
+    scriptDir = os.path.dirname(__file__)
+    assets_folder = os.path.join(scriptDir, '../assets/', filename)
+    file = os.path.abspath(assets_folder)
+    print(assets_folder)
+   
+cap = cv2.VideoCapture(filenamefile, cv2.CAP_DSHOW)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
