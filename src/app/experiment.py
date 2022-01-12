@@ -1,13 +1,30 @@
 import cv2
 import os
 import time
+import ctypes
 
 def show_image(img_path):
+    # Get screen size
+    ser32 = ctypes.windll.user32
+    size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+    
+    # Calculate midpoint of screen
+    mid_x, mid_y = int(size_screen[0])/2, int(size_screen[1])/2
+    
+    # Create white background
+    background = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+    
+    # Get images
+    background = cv2.imread(background, cv2.IMREAD_COLOR)
     img = cv2.imread(img_path)
-
+    
+    # Blend images
+    dst = cv2.addWeighted(background, 1, img, 1, 0.0)
+    
+    # Show images
     cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow('Display', img)
+    cv2.imshow('Display', dst)
 
 def cycle_images(final_folder_path):
     # Get file path from current data directory
