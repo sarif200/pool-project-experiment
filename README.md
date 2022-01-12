@@ -7,8 +7,8 @@
 - Dlib
 
 ## Known Issues:
-- [] last image on slideshow is displayed less then 3 seconds
-- [] when speed is less then 0.7 video stops
+- [ ] last image on slideshow is displayed less then 3 seconds
+- [ ] when speed is less then 0.7 video stops
 
 ## To do:
 
@@ -23,7 +23,7 @@
 ### Program
 - [x] Main Eye tracking
 - [ ] Screen projection
-- [ ] After & live processing
+- [x] After & live processing
 - [ ] global class to store fault data(like when the blobdetector doesn't find a blob)
 
 ## Coding guides
