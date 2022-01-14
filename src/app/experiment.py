@@ -1,25 +1,47 @@
+from weakref import ref
 import cv2
 import os
 import time
 import ctypes
+import numpy as np
 
 def show_image(img_path):
     # Get screen size
-    ser32 = ctypes.windll.user32
+    user32 = ctypes.windll.user32
     size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
-    
-    # Calculate midpoint of screen
-    mid_x, mid_y = int(size_screen[0])/2, int(size_screen[1])/2
+    print(size_screen)
     
     # Create white background
     background = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
     
     # Get images
-    background = cv2.imread(background, cv2.IMREAD_COLOR)
+    # background = cv2.imread(background)
     img = cv2.imread(img_path)
-    
+
+    # Get height & width from image
+    img_width, img_height = img.shape
+
+    # Calculate midpoint of screen
+    mid_x = int(size_screen[0])/2
+    mid_y = int(size_screen[1])/2
+
+    # Calculate width & height of image
+    img_w_mid = int(img_width) / 2
+    img_h_mid = int(img_height) / 2
+
+    # Calculate offset point
+    ref_x = int(mid_x + img_w_mid)
+    ref_y = int(mid_y + img_h_mid)
+    print(ref_x, ref_y)
+
+    # Creating overlay
+    overlay = np.zeros((img_height, img_width, 4), dtype="uint8")
+    overlay[ref_y:ref_y, ref_x:ref_x] = img
+
+    output = background.copy()
+
     # Blend images
-    dst = cv2.addWeighted(background, 1, img, 1, 0.0)
+    dst = cv2.addWeighted(overlay, 1, output, 1, 0, output)
     
     # Show images
     cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)

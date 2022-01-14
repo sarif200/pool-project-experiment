@@ -25,7 +25,7 @@ else:
     file = os.path.abspath(assets_folder)
     print(assets_folder)
    
-cap = cv2.VideoCapture(filenamefile, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(file, cv2.CAP_DSHOW)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
@@ -351,17 +351,17 @@ class gaze_tracker:
         
 
 tracker = pupil_tracker
-while True:
-     _, frame = cap.read()
+# while True:
+#      _, frame = cap.read()
     
-     pupils = tracker.detect_in_frame(tracker,frame)
-     print(pupils)
-     cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-     cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
-     cv2.imshow("Frame",frame )
-     key = cv2.waitKey(1)
-     if key == 27:
-         break
+#      pupils = tracker.detect_in_frame(tracker,frame)
+#      print(pupils)
+#      cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
+#      cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+#      cv2.imshow("Frame",frame )
+#      key = cv2.waitKey(1)
+#      if key == 27:
+#          break
    
 
 
