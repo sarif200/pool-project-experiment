@@ -35,8 +35,8 @@ def show_image(img_path):
     print(ref_x, ref_y)
 
     # Creating overlay
-    overlay = np.zeros((img_height, img_width, 4), dtype="uint8")
-    overlay[ref_y:ref_y, ref_x:ref_x] = img
+    bg = background.copy()
+    bg[mid_y:mid_y + img_h_mid, mid_x:mid_x + img_w_mid] = img
 
     output = background.copy()
 
