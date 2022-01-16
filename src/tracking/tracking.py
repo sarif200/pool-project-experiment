@@ -15,17 +15,18 @@ import sys
 
 # l = left (-x) and r = right (+x) 
 
-filename = 'video.mp4'
+filename = './src/assets/video.mp4'
 
 if filename == '':
     filename = 0
 else:
     scriptDir = os.path.dirname(__file__)
     assets_folder = os.path.join(scriptDir, '../assets/', filename)
-    file = os.path.abspath(assets_folder)
-    print(assets_folder)
+    
+    file = os.path.abspath(filename)
+    print(file)
    
-cap = cv2.VideoCapture(filenamefile, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(file)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
@@ -70,7 +71,7 @@ def cut_eyebrows(img):
     eyebrow_h = int(height / 4)
     return img[eyebrow_h:height, 0:width]  # cut eyebrows out (15 px)return img
 
-
+'''
 def subtract_tuples(tuple1,tuple2):
     return (tuple1[0]-tuple2[0],tuple1[1]-tuple2[1])
 
@@ -79,10 +80,11 @@ def add_tuples(tuple1,tuple2):
 
 def abs_tuples(tuple):
     return (abs(tuple[0]),abs(tuple[1]))
-'''
+
 class pupil_tracker:
     left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
+    
 
     #global declerations
     face_detector = dlib.get_frontal_face_detector()
@@ -174,7 +176,11 @@ class pupil_tracker:
         return selected_keypoint
     
     def __init__(self, shape_predictor_file = './src/assets/shape_predictor_68_face_landmarks.dat'):
-        self.predictor = dlib.shape_predictor(shape_predictor_file)
+        scriptDir = os.path.dirname(__file__)
+        assets_folder = os.path.join(scriptDir, '../assets/', shape_predictor_file)
+        file = os.path.abspath(assets_folder)
+        #print(assets_folder)
+        self.predictor = dlib.shape_predictor(file)
     
 
     def detect_in_frame(self,frame):
@@ -192,7 +198,7 @@ class pupil_tracker:
             #cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
             #pass
 
-        landmarks = predictor(gray, face[0])
+        landmarks = predictor(gray, faces[0])
         #left_point = (landmarks.part(36).x, landmarks.part(36).y)
         #right_point = (landmarks.part(39).x, landmarks.part(39).y)
 
@@ -206,7 +212,7 @@ class pupil_tracker:
         img_l_eye = gray[center_top_l[1]:center_bottom_l[1],landmarks.part(36).x:landmarks.part(39).x]
         img_r_eye = gray[center_top_r[1]:center_bottom_r[1],landmarks.part(42).x:landmarks.part(45).x]
 
-        backup_l_global = self.calc_pupil(landmarks,self.fleft)
+        backup_l_global = self.calc_pupil(landmarks,self.left)
         backup_r_global = self.calc_pupil(landmarks,self.right)
         #--------transform to eye space------------
         #backup_l = (abs(backup_l[0]-landmarks.part(36).x),abs(backup_l[1]-center_top_l[1])) 
@@ -278,8 +284,13 @@ class gaze_tracker:
         y_cut_min = np.transpose(np.array(calibration_cut))[1].min()
         return x_cut_min,y_cut_min
 
+    def show_window(title_window, window):
+        cv2.namedWindow(title_window, cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty(title_window, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.imshow(title_window,window)
+
         
-    def calibration(self,final_folder_path, foldername,camera_ID):
+    def calibration(self,final_folder_path, foldername,camera):
         corner  = 0
         calibration_cut_left = []
         calibration_cut_right = []
@@ -291,7 +302,7 @@ class gaze_tracker:
             #gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
 
             # draw circle
-            cv2.circle(calibration_page, self.corners[corner], 40, (0, 255, 0), -1)
+            cv2.circle(self.calibration_page, self.corners[corner], 40, (0, 255, 0), -1)
 
             pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
             '''
@@ -316,45 +327,51 @@ class gaze_tracker:
             if cv2.waitKey(33) == ord('a'):
                 calibration_cut_left.append(pupils[0])
                 calibration_cut_right.append(pupils[1])
-                print(pupil)
+                #print(pupil)
 
                 # visualize message
-                cv2.putText(calibration_page, 'ok',tuple(np.array(corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
+                cv2.putText(self.calibration_page, 'ok',tuple(np.array(self.corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
                 
                 corner += 1
 
             # Display results
             # print(calibration_cut, '    len: ', len(calibration_cut))
-            show_window('projection', calibration_page)
+            self.show_window('projection', self.calibration_page)
             # show_window('frame', cv2.resize(frame,  (640, 360)))
 
             if cv2.waitKey(113) == ord('q'):
                 break
 
         # Process calibration
-        x_cut_min, x_cut_max, y_cut_min, y_cut_max = self.find_cut_limits(calibration_cut)
-        offset_calibrated_cut = [ x_cut_min, y_cut_min ]
+        #x_cut_min, x_cut_max, y_cut_min, y_cut_max = self.find_cut_limits(calibration_cut)
+        #offset_calibrated_cut = [ x_cut_min, y_cut_min ]
 
         self.offset_calibrated_cut_left = self.offset_calibrated_cut(calibration_cut_left)
         self.offset_calibrated_cut_right = self.offset_calibrated_cut(calibration_cut_right)
 
-        self.save_calibration(foldername, offset_calibrated_cut)
+        #self.save_calibration(foldername, offset_calibrated_cut)
 
-        camera.release()
+        #camera.release()
         print('Calibration Finished')
         cv2.destroyAllWindows()
         #start_message(final_folder_path)
-    def track(self,frame):
-        pass
+    def track_in_frame(self,frame):
+        frame = cv2.flip(frame, 1)  # flip camera sees things mirorred
+        pupil_l,pupil_r = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+        return pupil_l + self.offset_calibrated_cut_left,pupil_r + self.offset_calibrated_cut_right
+        
 
         
         
 
 tracker = pupil_tracker
+gaze = gaze_tracker
+gaze.calibration(gaze,"test","test",cap)
 while True:
      _, frame = cap.read()
     
-     pupils = tracker.detect_in_frame(tracker,frame)
+     #pupils = tracker.detect_in_frame(tracker,frame)
+     pupils = gaze.track_in_frame(gaze,frame)
      print(pupils)
      cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
      cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
