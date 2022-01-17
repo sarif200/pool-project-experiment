@@ -41,7 +41,7 @@ def cycle_images(final_folder_path):
 
     show_image(os.path.join(img_folder, images[0]))
 
-    while (idx < 10):
+    while (idx < cnt):
         ret, frame = cap.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
@@ -58,7 +58,7 @@ def cycle_images(final_folder_path):
             delta_since_last_change = 0
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
-            idx += 1 if idx < cnt else 10
+            idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
         if key == 27:
