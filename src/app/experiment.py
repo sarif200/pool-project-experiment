@@ -58,7 +58,13 @@ def cycle_images(final_folder_path):
             delta_since_last_change = 0
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
-            idx += 1 if idx < cnt else cnt
+            #idx += 1 if idx < cnt else cnt
+            if idx < cnt:
+                idx += 1
+            else:
+                if delta_since_last_change >= TIME:
+                    idx = cnt
+                    break
 
         key = cv2.waitKey(1)
         if key == 27:
