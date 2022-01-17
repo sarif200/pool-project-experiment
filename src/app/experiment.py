@@ -1,6 +1,7 @@
 import cv2
 import os
 import time
+import pandas as pd
 
 def show_image(img_path):
     img = cv2.imread(img_path)
@@ -8,6 +9,21 @@ def show_image(img_path):
     cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow('Display', img)
+    
+def export(delta_since_last_change, pupil_l, pupil_r, project_folder, images):
+    # Set data structure
+    data = {
+            'Time Stamp': delta_since_last_change,
+            'Pupil Left': pupil_l,
+            'Pupil Right': pupil_r
+           }
+    
+    # Convert to panda data frame
+    df = pd.DataFrame(data, colums = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
+    
+    # Convert & export to excel
+    # Converted to 1 file with different sheet
+    df.to_excel(project_folder + 'results.xlsx', sheet_name=images[idx], index=False)
 
 def cycle_images(final_folder_path):
     # Get file path from current data directory
@@ -58,6 +74,7 @@ def cycle_images(final_folder_path):
             delta_since_last_change = 0
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
+            export(delta_since_last_change, pupil_l, pupil_r, project_folder, images)
             #idx += 1 if idx < cnt else cnt
             if idx < cnt:
                 idx += 1
