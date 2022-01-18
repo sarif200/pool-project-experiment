@@ -9,7 +9,6 @@ import numpy as np
 scriptDir = os.path.dirname(__file__)
 tracking_folder = os.path.join(scriptDir, '../tracking/')
 path = os.path.abspath(tracking_folder)
-print(path)
 
 sys.path.append(path)
 from tracking import pupil_tracker, gaze_tracker
