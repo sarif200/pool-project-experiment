@@ -1,9 +1,19 @@
 import cv2
 import os
 import time
+import sys
 import pandas as pd
 import ctypes
 import numpy as np
+
+scriptDir = os.path.dirname(__file__)
+tracking_folder = os.path.join(scriptDir, '../tracking/')
+path = os.path.abspath(tracking_folder)
+
+sys.path.append(path)
+from tracking import pupil_tracker
+
+tracker = pupil_tracker
 
 def show_image(img_path):
     # Get screen size
@@ -36,7 +46,7 @@ def show_image(img_path):
     cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow('Display', dst)
     
-def export(delta_since_last_change, pupil_l, pupil_r, project_folder, images, idx):
+def export(delta_since_last_change, pupil_l, pupil_r, project_folder, image):
     # Set data structure
     data = {
             'Time Stamp': delta_since_last_change,
@@ -49,7 +59,7 @@ def export(delta_since_last_change, pupil_l, pupil_r, project_folder, images, id
     
     # Convert & export to excel
     # Converted to 1 file with different sheet
-    df.to_excel(project_folder + 'results.xlsx', sheet_name=images[idx], index=False)
+    df.to_excel(project_folder + 'results.xlsx', sheet_name=image, index=False)
 
 def cycle_images(final_folder_path):
     # Get file path from current data directory
@@ -72,11 +82,11 @@ def cycle_images(final_folder_path):
     idx = 1
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-    fps = 15
+    # fps = 15
 
-    # Video Codec
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
+    # # Video Codec
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    # output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
     
     prev_time = time.time()
     delta_since_last_change = 0
@@ -84,12 +94,18 @@ def cycle_images(final_folder_path):
     show_image(os.path.join(img_folder, images[0]))
 
     while (idx < cnt):
+        pupils = tracker.detect_in_frame(tracker,frame)
         ret, frame = cap.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             break
 
-        output.write(frame)
+        # output.write(frame)
+        pupil_l = (int(pupils[0][0]),int(pupils[0][1]))
+        pupil_r = (int(pupils[1][0]),int(pupils[1][1]))
+
+        cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0, 255, 0),3)
+        cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(255, 0, 0),3)
         cv2.imshow('frame', frame)
         
         delta = time.time() - prev_time 
@@ -101,7 +117,9 @@ def cycle_images(final_folder_path):
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
             print(images[idx])
-            export(delta_since_last_change, pupil_l, pupil_r, project_folder, images, idx)
+
+            export(delta_since_last_change, pupil_l, pupil_r, project_folder, images[idx])
+
             idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
@@ -109,5 +127,5 @@ def cycle_images(final_folder_path):
             break
 
     cap.release()
-    output.release()
+    # output.release()
     cv2.destroyAllWindows()
