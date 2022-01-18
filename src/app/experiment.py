@@ -11,7 +11,7 @@ tracking_folder = os.path.join(scriptDir, '../tracking/')
 path = os.path.abspath(tracking_folder)
 
 sys.path.append(path)
-from tracking import pupil_tracker
+from tracking.tracking import pupil_tracker, gaze_tracker
 
 tracker = pupil_tracker
 

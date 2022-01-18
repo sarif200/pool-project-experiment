@@ -436,28 +436,28 @@ class gaze_tracker:
         
 
 tracker = pupil_tracker
-gaze = gaze_tracker
-print(gaze.corners)
-gaze.calibration(gaze,"test","test",cap)
-user32 = ctypes.windll.user32
-size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
-blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
-while True:
-     _, frame = cap.read()
+# gaze = gaze_tracker
+# print(gaze.corners)
+# gaze.calibration(gaze,"test","test",cap)
+# user32 = ctypes.windll.user32
+# size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+# blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+# while True:
+#      _, frame = cap.read()
     
-     #pupils = tracker.detect_in_frame(tracker,frame)
-     pupils = gaze.track_in_frame(gaze,frame)
-     print(pupils)
-     main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
-     cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-     cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
-     #cv2.imshow("Frame",frame )
-     cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
-     cv2.setWindowProperty("title_window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-     cv2.imshow("title_window",main_window)
-     key = cv2.waitKey(1)
-     if key == 27:
-         break
+#      #pupils = tracker.detect_in_frame(tracker,frame)
+#      pupils = gaze.track_in_frame(gaze,frame)
+#      print(pupils)
+#      main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+#      cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
+#      cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+#      #cv2.imshow("Frame",frame )
+#      cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
+#      cv2.setWindowProperty("title_window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#      cv2.imshow("title_window",main_window)
+#      key = cv2.waitKey(1)
+#      if key == 27:
+#          break
    
 
 

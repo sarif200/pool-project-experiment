@@ -9,9 +9,10 @@ import sys
 scriptDir = os.path.dirname(__file__)
 tracking_folder = os.path.join(scriptDir, '../tracking')
 path = os.path.abspath(tracking_folder)
+print(scriptDir, tracking_folder, path)
 
 sys.path.append(path)
-from tracking import pupil_tracker
+from tracking.tracking import pupil_tracker, gaze_tracker
 
 # Open New Window
 def resultsWindow():
