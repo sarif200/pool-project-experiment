@@ -5,9 +5,9 @@
 - Numpy
 - PySimpleGUI
 - Dlib
+- Pandas
 
 ## Known Issues:
-- [ ] last image on slideshow is displayed less then 3 seconds
 - [ ] when speed is less then 0.7 video stops
 
 ## To do:
@@ -36,6 +36,7 @@
 - openCV library is written as cv2
 - numpy library is written as np
 - PySimpleGUI library is written as sg
+- Panda library is written as pd
 - all interfaces with SystemDefaultForReal theme
 
 ## Installation
@@ -60,9 +61,8 @@ CMake is required for this project.
 3. Fill project name in
 4. Complete Calibration
 5. Images are shown
-6. Navigate to results page
-7. Open folder
-8. Video is projected on screen
+6. While images are shown, coordinates of pupils are written to excel file
+7. Create in excel file heatmap
 
 ## Explanation
 ### main.py
