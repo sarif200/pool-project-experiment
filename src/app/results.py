@@ -1,7 +1,6 @@
 # Import libraries
 import PySimpleGUI as sg
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import cv2
