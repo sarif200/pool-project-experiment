@@ -15,6 +15,7 @@ sys.path.append(path)
 from tracking import pupil_tracker, gaze_tracker
 
 tracker = pupil_tracker
+gaze = gaze_tracker
 
 def show_image(img_path):
     # Get screen size
@@ -56,7 +57,7 @@ def export(delta_since_last_change, pupil_l, pupil_r, project_folder, image):
            }
     
     # Convert to panda data frame
-    df = pd.DataFrame(data, colums = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
+    df = pd.DataFrame(data, columns = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
     
     # Convert & export to excel
     # Converted to 1 file with different sheet
@@ -95,11 +96,13 @@ def cycle_images(final_folder_path):
     show_image(os.path.join(img_folder, images[0]))
 
     while (idx < cnt):
-        pupils = tracker.detect_in_frame(tracker,frame)
         ret, frame = cap.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             break
+
+        pupils = tracker.detect_in_frame(tracker,frame)
+        # pupils = gaze.track_in_frame(gaze,frame)
 
         # output.write(frame)
         pupil_l = (int(pupils[0][0]),int(pupils[0][1]))
