@@ -1,7 +1,6 @@
 import PySimpleGUI as sg
 from results import resultsWindow
 from new_project import createFolder
-from settings import SettingsWindow
 
 # Main window
 def main():
@@ -13,7 +12,6 @@ def main():
             sg.Text("Project Eye Tracking"), 
             sg.Button("New Project", key=("new_project")), 
             sg.Button("Open Project", key=("open_project")), 
-            sg.Button("Settings", key=("settings"))
         ],
         [
             sg.HorizontalSeparator()
@@ -37,8 +35,6 @@ def main():
             resultsWindow()
         if event == "new_project":
             createFolder()
-        if event == "settings":
-            SettingsWindow()
 
     window.close()
 

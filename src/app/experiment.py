@@ -16,7 +16,6 @@ def show_image(img_path):
     # Calculate midpoint of screen
     mid_x = int(size_screen[0]) / 2
     mid_y = int(size_screen[1]) / 2
-    print(mid_x, mid_y)
     
     # Get images
     img = cv2.imread(img_path)
@@ -27,9 +26,6 @@ def show_image(img_path):
     # Caclulate middle of screen
     yoff = round((mid_y - img_height)/2)
     xoff = round((mid_x + img_width/4))
-    print(xoff, yoff)
-
-    # print(int(mid_x)/2 - int(img_width)/2)
 
     # Creating overlay
     dst = background.copy()
@@ -38,9 +34,9 @@ def show_image(img_path):
     # Show images
     cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow('Display', img)
+    cv2.imshow('Display', dst)
     
-def export(delta_since_last_change, pupil_l, pupil_r, project_folder, images):
+def export(delta_since_last_change, pupil_l, pupil_r, project_folder, images, idx):
     # Set data structure
     data = {
             'Time Stamp': delta_since_last_change,
@@ -104,7 +100,8 @@ def cycle_images(final_folder_path):
             delta_since_last_change = 0
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
-            export(delta_since_last_change, pupil_l, pupil_r, project_folder, images)
+            print(images[idx])
+            export(delta_since_last_change, pupil_l, pupil_r, project_folder, images, idx)
             idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
