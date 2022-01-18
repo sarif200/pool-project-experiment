@@ -1,4 +1,3 @@
-from weakref import ref
 import cv2
 import os
 import time
@@ -9,39 +8,31 @@ def show_image(img_path):
     # Get screen size
     user32 = ctypes.windll.user32
     size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
-    print(size_screen)
     
     # Create white background
     background = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+
+    # Calculate midpoint of screen
+    mid_x = int(size_screen[0]) / 2
+    mid_y = int(size_screen[1]) / 2
+    print(mid_x, mid_y)
     
     # Get images
-    # background = cv2.imread(background)
     img = cv2.imread(img_path)
 
     # Get height & width from image
-    img_width, img_height = img.shape
+    img_width, img_height = img.shape[:2]
 
-    # Calculate midpoint of screen
-    mid_x = int(size_screen[0])/2
-    mid_y = int(size_screen[1])/2
+    # Caclulate middle of screen
+    yoff = round((mid_y - img_height)/2)
+    xoff = round((mid_x + img_width/4))
+    print(xoff, yoff)
 
-    # Calculate width & height of image
-    img_w_mid = int(img_width) / 2
-    img_h_mid = int(img_height) / 2
-
-    # Calculate offset point
-    ref_x = int(mid_x + img_w_mid)
-    ref_y = int(mid_y + img_h_mid)
-    print(ref_x, ref_y)
+    # print(int(mid_x)/2 - int(img_width)/2)
 
     # Creating overlay
-    bg = background.copy()
-    bg[mid_y:mid_y + img_h_mid, mid_x:mid_x + img_w_mid] = img
-
-    output = background.copy()
-
-    # Blend images
-    dst = cv2.addWeighted(overlay, 1, output, 1, 0, output)
+    dst = background.copy()
+    dst[yoff: yoff + img_height, xoff:xoff + img_width] = img
     
     # Show images
     cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
@@ -80,7 +71,7 @@ def cycle_images(final_folder_path):
 
     show_image(os.path.join(img_folder, images[0]))
 
-    while (idx < 10):
+    while (idx < cnt):
         ret, frame = cap.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
@@ -97,7 +88,7 @@ def cycle_images(final_folder_path):
             delta_since_last_change = 0
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
-            idx += 1 if idx < cnt else 10
+            idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
         if key == 27:
