@@ -12,7 +12,7 @@ path = os.path.abspath(tracking_folder)
 print(scriptDir, tracking_folder, path)
 
 sys.path.append(path)
-from tracking.tracking import pupil_tracker, gaze_tracker
+from tracking import pupil_tracker, gaze_tracker
 
 # Open New Window
 def resultsWindow():

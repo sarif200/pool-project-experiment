@@ -29,7 +29,7 @@ else:
     file = os.path.abspath(filename)
     print(file)
    
-cap = cv2.VideoCapture(file)
+cap = cv2.VideoCapture(file, cv2.CAP_DSHOW)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
