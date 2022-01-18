@@ -216,10 +216,6 @@ def resultsWindow():
                 key='-CAPTION-',
                 enable_events=True
             )
-        ],
-        [
-            sg.Text('Heatmap:'),
-            sg.Button('Generate', size=(10,1), key="-HEATMAP-")
         ]
     ])
 
@@ -362,9 +358,6 @@ def resultsWindow():
 
         if event == '>>>':
             pass
-
-        if event == "-HEATMAP-":
-            createHeatMap()
         
         # Show original video
         cv2.imshow("Original video", frame)
@@ -394,19 +387,3 @@ def resultsWindow():
     cap.release()
     cv2.destroyAllWindows()
     window.close()
-
-def createHeatMap(pupils):
-    # # Calculate midpoint of view
-    # view_x, view_y = int((pupils[0][0] + pupils[1][0])/2), int((pupils[0][1] + pupils[1][1])/2)
-
-    # ax = sns.kdeplot(view_x, view_y, cmap="Blues", shade=True, shade_lowest=False)
-    
-    # ax.set_frame_on(False)
-    # plt.xlim(0, 704)
-    # plt.ylim(576, 0)
-    # plt.axis('off')
-    # plt.show()
-
-    # fig = ax.get_figure()
-    # fig.savefig('heatmap.png', transparent=True, bbox_inches='tight', pad_inches=0)
-    pass

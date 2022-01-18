@@ -2,4 +2,4 @@ numpy == 1.21.1
 opencv_python == 4.5.4-dev
 dlib == 19.22.1
 PySimpleGUI == 4.55.1
-seaborn == 0.11.2
+pandas == 1.3.2
