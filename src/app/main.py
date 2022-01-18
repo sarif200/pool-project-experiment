@@ -1,7 +1,6 @@
 import PySimpleGUI as sg
 from results import resultsWindow
 from new_project import createFolder
-from settings import SettingsWindow
 
 # Main window
 def main():
@@ -13,7 +12,6 @@ def main():
             sg.Text("Project Eye Tracking"), 
             sg.Button("New Project", key=("new_project")), 
             sg.Button("Open Project", key=("open_project")), 
-            sg.Button("Settings", key=("settings"))
         ],
         [
             sg.HorizontalSeparator()
@@ -22,7 +20,7 @@ def main():
             sg.Text("Instructions:")
         ],
         [
-            sg.Multiline("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", size=(450,500), key='textbox')
+            sg.Multiline("Stap 1: klik op maak nieuw project. \nStap 2: Vul de gewenste project naam in. \nStap 3: Klik op calibreer, kijk naar de groene cirkels. Druk op de toets a wanneer je ernaar kijkt (meerdere klik soms nodig). \nStap 4: Wanneer de calibratie voltooid is druk op het de start knop om het experiment te starten. \nStap 5: Kijk naar de foto's zonder je blik te forceren.", size=(450,500), key='textbox', font="Helvetica 14")
         ]
     ]
     
@@ -37,8 +35,6 @@ def main():
             resultsWindow()
         if event == "new_project":
             createFolder()
-        if event == "settings":
-            SettingsWindow()
 
     window.close()
 

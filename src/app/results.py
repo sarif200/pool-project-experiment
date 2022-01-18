@@ -1,6 +1,7 @@
 # Import libraries
 import PySimpleGUI as sg
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 import cv2
 import sys
@@ -8,9 +9,10 @@ import sys
 scriptDir = os.path.dirname(__file__)
 tracking_folder = os.path.join(scriptDir, '../tracking')
 path = os.path.abspath(tracking_folder)
+print(scriptDir, tracking_folder, path)
 
 sys.path.append(path)
-from tracking import pupil_tracker
+from tracking import pupil_tracker, gaze_tracker
 
 # Open New Window
 def resultsWindow():
@@ -214,10 +216,6 @@ def resultsWindow():
                 key='-CAPTION-',
                 enable_events=True
             )
-        ],
-        [
-            sg.Text('Heatmap:'),
-            sg.Button('Generate', size=(10,1), key="-HEATMAP-")
         ]
     ])
 
@@ -360,9 +358,6 @@ def resultsWindow():
 
         if event == '>>>':
             pass
-
-        if event == "-HEATMAP-":
-            createHeatMap()
         
         # Show original video
         cv2.imshow("Original video", frame)
@@ -392,6 +387,3 @@ def resultsWindow():
     cap.release()
     cv2.destroyAllWindows()
     window.close()
-
-def createHeatMap():
-    pass
