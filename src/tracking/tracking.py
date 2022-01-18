@@ -90,6 +90,7 @@ def multi_tuples(tuple1,tuple2):
 def div_tuples(tuple1,tuple2):
     return (tuple1[0]/tuple2[0],tuple1[1]/tuple2[1])
 
+
 class pupil_tracker:
     left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
@@ -105,6 +106,7 @@ class pupil_tracker:
     #get the middle of two points in 2d  space
     def midpoint(p1, p2):
         return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
+
 
     #cut the top 4th of a image
     def cut_eyebrows(img):
@@ -134,29 +136,34 @@ class pupil_tracker:
     
     #this wil find and return the most probable place of the pupil 
     def detect_pupil(self,eye,backup): # backup is a point that is returned by a calc pupil func
-
+        #return backup
         # edit the images so it the blob detector wil work better
         #inverted = np.invert(eye)
         blur = cv2.GaussianBlur(eye,(9,9),0)
-        ret,thresh1 = cv2.threshold(blur,5,255,cv2.THRESH_BINARY)
-        #kernel = np.ones((2,2),np.uint8)
+        ret,thresh1 = cv2.threshold(blur,10,255,cv2.THRESH_BINARY)
+        #kernel = np.ones((2,2),np.uint8) 
         #erosion = cv2.erode(thresh1,kernel,iterations = 1)
         #closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, kernel)
-        
-        pupil = cv2.HoughCircles(eye,cv2.HOUGH_GRADIENT,1,20,param1=50,param2=30,minRadius=0,maxRadius=0)
+        blur = cv2.GaussianBlur(eye,(9,9),0)
+        ret,thresh1 = cv2.threshold(blur,8,255,cv2.THRESH_BINARY)
+        kernel = np.ones((2,2),np.uint8)
+        erosion = cv2.erode(thresh1,kernel,iterations = 1)
+
+        pupil = cv2.HoughCircles(erosion,cv2.HOUGH_GRADIENT,1,20,param1=300,param2=0.8,minRadius=0,maxRadius=0)
+        print(pupil)
         #contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         #cv2.drawContours(erosion, contours, -1, (0,255,0), 3)
         #cv2.imshow("test",erosion)
         #print(hierarchy)
         #im_tresh = cut_eyebrows(img_l_eye)
         #blob detection 
-        pupil = self.image_blob_detection(self,thresh1)
+        pupil = self.image_blob_detection(self,eye)
         
         #im_with_keypoints = cv2.drawKeypoints(erosion, pupil, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         #pupil = np.uint16(np.around(pupil))
 
-        print(pupil)
+        #print(pupil)
         #if no blobs are found we  return the backup
         if len(pupil) ==0:
             return backup
@@ -225,7 +232,9 @@ class pupil_tracker:
         img_r_eye = gray[center_top_r[1]:center_bottom_r[1],landmarks.part(42).x:landmarks.part(45).x]
 
         backup_l_global = self.calc_pupil(landmarks,self.left)
+        backup_l_global = div_tuples(add_tuples(center_top_l,center_bottom_l),(2,2))
         backup_r_global = self.calc_pupil(landmarks,self.right)
+        backup_r_global = div_tuples(add_tuples(center_top_r,center_bottom_r),(2,2))
         #--------transform to eye space------------
         #backup_l = (abs(backup_l[0]-landmarks.part(36).x),abs(backup_l[1]-center_top_l[1])) 
         #backup_r = (abs(backup_r[0]-landmarks.part(42).x),abs(backup_r[1]-center_top_r[1])) 
@@ -247,9 +256,9 @@ class pupil_tracker:
 
             self.start_pos = middle
         else:
-            differnce = subtract_tuples(self.start_pos,middle)
-            pupil_l = subtract_tuples(differnce,pupil_l)
-            pupil_r = subtract_tuples(differnce,pupil_r)
+            difference = subtract_tuples(self.start_pos,middle)
+            pupil_l = add_tuples(difference,pupil_l)
+            pupil_r = add_tuples(difference,pupil_r)
         
         return pupil_l,pupil_r
 
@@ -312,10 +321,10 @@ class gaze_tracker:
 
 
     def find_cut_limits_offset(calibration_cut):
-        x_cut_max = np.transpose(np.array(calibration_cut))[0].max()
-        x_cut_min = np.transpose(np.array(calibration_cut))[0].min()
-        y_cut_max = np.transpose(np.array(calibration_cut))[1].max()
-        y_cut_min = np.transpose(np.array(calibration_cut))[1].min()
+        x_cut_max = (np.transpose(np.array(calibration_cut))[0].max()).astype('int')
+        x_cut_min = (np.transpose(np.array(calibration_cut))[0].min()).astype('int')
+        y_cut_max = (np.transpose(np.array(calibration_cut))[1].max()).astype('int')
+        y_cut_min = (np.transpose(np.array(calibration_cut))[1].min()).astype('int')
         offset = x_cut_min,y_cut_min
         return x_cut_min, x_cut_max, y_cut_min, y_cut_max,offset
    
@@ -344,11 +353,7 @@ class gaze_tracker:
             # draw circle
             cv2.circle(self.calibration_page, self.corners[corner], 40, (0, 255, 0), -1)
 
-            self.show_window('projection', self.calibration_page)
-            while not started:
-                if cv2.waitKey(33) == ord('a'):
-                    cv2.circle(self.calibration_page, self.corners[corner], 10, (255, 0, 0), -1)
-                    started = True
+            
 
 
 
@@ -360,6 +365,7 @@ class gaze_tracker:
             
 
             pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+            print(pupils)
             '''
             # detect faces in frame
             faces = detector(gray_scale_frame)
@@ -382,7 +388,7 @@ class gaze_tracker:
             if cv2.waitKey(33) == ord('a'):
                 calibration_cut_left.append(pupils[0])
                 calibration_cut_right.append(pupils[1])
-                print()
+                
 
                 # visualize message
                 cv2.putText(self.calibration_page, 'ok',tuple(np.array(self.corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
@@ -397,7 +403,7 @@ class gaze_tracker:
 
             if cv2.waitKey(113) == ord('q'):
                 break
-
+        print(calibration_cut_left)
         # Process calibration
         #x_cut_min_l, x_cut_max_l, y_cut_min_l, y_cut_max_l = self.find_cut_limits(calibration_cut)
         #offset_calibrated_cut = [ x_cut_min, y_cut_min ]
@@ -409,8 +415,9 @@ class gaze_tracker:
         #self.offset_calibrated_cut_left = self.offset_calibrated_cut(calibration_cut_left)
         #self.offset_calibrated_cut_right = self.offset_calibrated_cut(calibration_cut_right)
 
-        self.scale_l = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_l.shape))
-        self.scale_r = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_r.shape))
+        
+        #self.scale_l = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_l.shape))
+        #self.scale_r = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_r.shape))
 
         self.scale_l = div_tuples(self.calibration_page.shape,self.cut_frame_l.shape)
         self.scale_r = div_tuples(self.calibration_page.shape,self.cut_frame_r.shape)
@@ -438,17 +445,18 @@ class gaze_tracker:
 tracker = pupil_tracker
 gaze = gaze_tracker
 print(gaze.corners)
-gaze.calibration(gaze,"test","test",cap)
+#gaze.calibration(gaze,"test","test",cap)
 user32 = ctypes.windll.user32
 size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
 blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
 while True:
      _, frame = cap.read()
     
-     #pupils = tracker.detect_in_frame(tracker,frame)
-     pupils = gaze.track_in_frame(gaze,frame)
-     print(pupils)
+     pupils = tracker.detect_in_frame(tracker,frame)
+     #pupils = gaze.track_in_frame(gaze,frame)
+     #print(pupils)
      main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+     main_window = frame
      cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
      cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
      #cv2.imshow("Frame",frame )
