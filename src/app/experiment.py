@@ -1,13 +1,43 @@
 import cv2
 import os
 import time
+import ctypes
+import numpy as np
 
 def show_image(img_path):
+    # Get screen size
+    user32 = ctypes.windll.user32
+    size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+    
+    # Create white background
+    background = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+
+    # Calculate midpoint of screen
+    mid_x = int(size_screen[0]) / 2
+    mid_y = int(size_screen[1]) / 2
+    print(mid_x, mid_y)
+    
+    # Get images
     img = cv2.imread(img_path)
 
+    # Get height & width from image
+    img_width, img_height = img.shape[:2]
+
+    # Caclulate middle of screen
+    yoff = round((mid_y - img_height)/2)
+    xoff = round((mid_x + img_width/4))
+    print(xoff, yoff)
+
+    # print(int(mid_x)/2 - int(img_width)/2)
+
+    # Creating overlay
+    dst = background.copy()
+    dst[yoff: yoff + img_height, xoff:xoff + img_width] = img
+    
+    # Show images
     cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow('Display', img)
+    cv2.imshow('Display', dst)
 
 def cycle_images(final_folder_path):
     # Get file path from current data directory
@@ -58,13 +88,7 @@ def cycle_images(final_folder_path):
             delta_since_last_change = 0
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
-            #idx += 1 if idx < cnt else cnt
-            if idx < cnt:
-                idx += 1
-            else:
-                if delta_since_last_change >= TIME:
-                    idx = cnt
-                    break
+            idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
         if key == 27:
