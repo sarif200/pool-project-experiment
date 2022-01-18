@@ -1,6 +1,8 @@
 # Import libraries
 import PySimpleGUI as sg
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 import os
 import cv2
 import sys
@@ -393,5 +395,18 @@ def resultsWindow():
     cv2.destroyAllWindows()
     window.close()
 
-def createHeatMap():
+def createHeatMap(pupils):
+    # # Calculate midpoint of view
+    # view_x, view_y = int((pupils[0][0] + pupils[1][0])/2), int((pupils[0][1] + pupils[1][1])/2)
+
+    # ax = sns.kdeplot(view_x, view_y, cmap="Blues", shade=True, shade_lowest=False)
+    
+    # ax.set_frame_on(False)
+    # plt.xlim(0, 704)
+    # plt.ylim(576, 0)
+    # plt.axis('off')
+    # plt.show()
+
+    # fig = ax.get_figure()
+    # fig.savefig('heatmap.png', transparent=True, bbox_inches='tight', pad_inches=0)
     pass
