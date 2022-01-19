@@ -1,16 +1,14 @@
 # Code for calibration tracking
-from calibrationFunctions import *
+from functions import *
 import dlib
 import cv2
 import sys
-import PySimpleGUI as sg
-from experiment import cycle_images
 import ctypes
 
 # used https://github.com/michemingway/eye-writing-easy
 
 # Input
-camera_ID = 0
+cap_ID = 0
 
 # Config
 width = 1860
@@ -26,7 +24,7 @@ calibration_page = make_white_page(size = size_screen)
 
 def calibration(final_folder_path, foldername):
     # Initialize
-    camera = init_camera(camera_ID = camera_ID)
+    cap = init_camera(cap_ID = cap_ID)
 
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("./src/assets/shape_predictor_68_face_landmarks.dat")
@@ -43,7 +41,7 @@ def calibration(final_folder_path, foldername):
 
     while (corner<4): # calibration of 4 corners
 
-        ret, frame = camera.read()   # Capture frame
+        ret, frame = cap.read()   # Capture frame
         frame = adjust_frame(frame)  # rotate / flip
 
         gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
@@ -90,29 +88,7 @@ def calibration(final_folder_path, foldername):
 
     save_calibration(foldername, offset_calibrated_cut)
 
-    camera.release()
+    cap.release()
     print('Calibration Finished')
     cv2.destroyAllWindows()
     start_message(final_folder_path)
-
-def start_message(final_folder_path):
-    sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
-    
-    # Add layout
-    layout = [
-        [sg.Text('Calibratie succesvol! Klik op start om te starten!')],
-        [sg.Button('Start', key="Start")]
-    ]
-    
-    # Create window & event loop
-    window = sg.Window("Titel", layout)
-
-    while True:
-        event, values = window.read()
-        if event == "Start":
-            window.close()
-            cycle_images(final_folder_path)
-        if event == "Exit" or event == sg.WIN_CLOSED:
-            break
-    
-    window.close()

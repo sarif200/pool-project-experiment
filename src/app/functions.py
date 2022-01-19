@@ -2,6 +2,8 @@
 import os
 import cv2
 import numpy as np
+import PySimpleGUI as sg
+from experiment import cycle_images
 
 dict_color = {'green': (0,255,0),
               'blue':(255,0,0),
@@ -72,3 +74,25 @@ def save_calibration(foldername, offset_calibrated_cut):
     document.write(str(offset_calibrated_cut))
 
     print("Succesfully writed to file")
+
+def start_message(final_folder_path):
+    sg.theme('SystemDefaultForReal') # Set Theme for PySimpleGUI
+    
+    # Add layout
+    layout = [
+        [sg.Text('Calibratie succesvol! Klik op start om te starten!')],
+        [sg.Button('Start', key="Start")]
+    ]
+    
+    # Create window & event loop
+    window = sg.Window("Titel", layout)
+
+    while True:
+        event, values = window.read()
+        if event == "Start":
+            window.close()
+            cycle_images(final_folder_path)
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+    
+    window.close()
