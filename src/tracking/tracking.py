@@ -4,6 +4,7 @@ import dlib
 import os 
 import ctypes
 import sys
+from gaze_tracking import GazeTracking
 
 # used https://github.com/MCodez/PUPIL-Detection-using-OpenCV
 
@@ -128,7 +129,7 @@ class pupil_tracker:
 
     def image_blob_detection(self,image):
         blur = cv2.GaussianBlur(image,(9,9),0)
-        ret,thresh1 = cv2.threshold(blur,8,255,cv2.THRESH_BINARY)
+        ret,thresh1 = cv2.threshold(blur,12,255,cv2.THRESH_BINARY)
         kernel = np.ones((2,2),np.uint8)
         erosion = cv2.erode(thresh1,kernel,iterations = 1)
         cv2.imshow("test",erosion)
@@ -140,17 +141,14 @@ class pupil_tracker:
         # edit the images so it the blob detector wil work better
         #inverted = np.invert(eye)
         blur = cv2.GaussianBlur(eye,(9,9),0)
-        ret,thresh1 = cv2.threshold(blur,10,255,cv2.THRESH_BINARY)
+        ret,thresh1 = cv2.threshold(blur,20,255,cv2.THRESH_BINARY)
         #kernel = np.ones((2,2),np.uint8) 
         #erosion = cv2.erode(thresh1,kernel,iterations = 1)
         #closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, kernel)
-        blur = cv2.GaussianBlur(eye,(9,9),0)
-        ret,thresh1 = cv2.threshold(blur,8,255,cv2.THRESH_BINARY)
-        kernel = np.ones((2,2),np.uint8)
-        erosion = cv2.erode(thresh1,kernel,iterations = 1)
+        
 
-        pupil = cv2.HoughCircles(erosion,cv2.HOUGH_GRADIENT,1,20,param1=300,param2=0.8,minRadius=0,maxRadius=0)
-        print(pupil)
+        #pupil = cv2.HoughCircles(erosion,cv2.HOUGH_GRADIENT,1,20,param1=300,param2=0.8,minRadius=0,maxRadius=0)
+        #print(pupil)
         #contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         #cv2.drawContours(erosion, contours, -1, (0,255,0), 3)
         #cv2.imshow("test",erosion)
@@ -267,6 +265,7 @@ class pupil_tracker:
 class gaze_tracker:
     
     pupilTracker = pupil_tracker
+    tr = GazeTracking()
     width = 1366#1860
     height = 768#1020
     offset = (40, 40)
@@ -363,8 +362,9 @@ class gaze_tracker:
             #gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
 
             
-
-            pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+            tr.refresh(frame)
+            pupils = tr.pupil_left_coords(),tr.pupil_right_coords()
+            #pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
             print(pupils)
             '''
             # detect faces in frame
@@ -431,7 +431,10 @@ class gaze_tracker:
         #start_message(final_folder_path)
     def track_in_frame(self,frame):
         frame = cv2.flip(frame, 1)  # flip camera sees things mirorred
-        pupil_l,pupil_r = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+        tr.refresh(frame)
+        pupil_l = tr.pupil_left_coords()
+        pupil_r  = tr.pupil_right_coords()
+        #pupil_l,pupil_r = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
         #return pupil_l + self.offset_calibrated_cut_left,pupil_r + self.offset_calibrated_cut_right
         #return pupil_l - self.offset_calibrated_cut_left,pupil_r - self.offset_calibrated_cut_right
         left = multi_tuples(subtract_tuples(pupil_l,self.offset_calibrated_cut_left),self.scale_l)
@@ -441,25 +444,29 @@ class gaze_tracker:
 
         
         
-
+tr = GazeTracking()
 tracker = pupil_tracker
 gaze = gaze_tracker
 print(gaze.corners)
-#gaze.calibration(gaze,"test","test",cap)
+gaze.calibration(gaze,"test","test",cap)
 user32 = ctypes.windll.user32
 size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
 blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
 while True:
      _, frame = cap.read()
-    
-     pupils = tracker.detect_in_frame(tracker,frame)
-     #pupils = gaze.track_in_frame(gaze,frame)
-     #print(pupils)
+     #tr.refresh(frame)
+     #pupils = tracker.detect_in_frame(tracker,frame)
+     pupils = gaze.track_in_frame(gaze,frame)
+     print(pupils)
+     #pupil = tr.pupil_left_coords()
+     #print(str(pupil))
      main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+     #frame = tr.annotated_frame()
      main_window = frame
      cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
      cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
      #cv2.imshow("Frame",frame )
+     
      cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
      cv2.setWindowProperty("title_window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
      cv2.imshow("title_window",main_window)
