@@ -76,6 +76,13 @@ def cut_eyebrows(img):
     return img[eyebrow_h:height, 0:width]  # cut eyebrows out (15 px)return img
 
 '''
+def clamp(num, min, max):
+    if num > max:
+        return max
+    elif num < min:
+        return min
+    else:
+        return num
 def subtract_tuples(tuple1,tuple2):
     return (tuple1[0]-tuple2[0],tuple1[1]-tuple2[1])
 
@@ -91,6 +98,8 @@ def multi_tuples(tuple1,tuple2):
 def div_tuples(tuple1,tuple2):
     return (tuple1[0]/tuple2[0],tuple1[1]/tuple2[1])
 
+def clamp_tuple(num,min_num,max_num):
+    return clamp(num[0],min_num[0],max_num[0]),clamp(num[1],min_num[1],max_num[1])
 
 class pupil_tracker:
     left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
@@ -320,10 +329,10 @@ class gaze_tracker:
 
 
     def find_cut_limits_offset(calibration_cut):
-        x_cut_max = (np.transpose(np.array(calibration_cut))[0].max()).astype('int')
-        x_cut_min = (np.transpose(np.array(calibration_cut))[0].min()).astype('int')
-        y_cut_max = (np.transpose(np.array(calibration_cut))[1].max()).astype('int')
-        y_cut_min = (np.transpose(np.array(calibration_cut))[1].min()).astype('int')
+        x_cut_max = (np.transpose(np.array(calibration_cut))[0].max())
+        x_cut_min = (np.transpose(np.array(calibration_cut))[0].min())
+        y_cut_max = (np.transpose(np.array(calibration_cut))[1].max())
+        y_cut_min = (np.transpose(np.array(calibration_cut))[1].min())
         offset = x_cut_min,y_cut_min
         return x_cut_min, x_cut_max, y_cut_min, y_cut_max,offset
    
@@ -385,11 +394,11 @@ class gaze_tracker:
             pupil_coordinates = np.mean([right_eye_coordinates[2], right_eye_coordinates[3]], axis = 0).astype('int')
             '''
 
-            if cv2.waitKey(33) == ord('a'):
+            if cv2.waitKey(33) == ord('a') and pupils[0] is not None and pupils[1] is not None:
                 calibration_cut_left.append(pupils[0])
                 calibration_cut_right.append(pupils[1])
                 
-
+                
                 # visualize message
                 cv2.putText(self.calibration_page, 'ok',tuple(np.array(self.corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
                 
@@ -418,9 +427,97 @@ class gaze_tracker:
         
         #self.scale_l = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_l.shape))
         #self.scale_r = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_r.shape))
-
-        self.scale_l = div_tuples(self.calibration_page.shape,self.cut_frame_l.shape)
+        
+        self.scale_l = div_tuples(self.calibration_page.shape,(y_cut_max_l-y_cut_min_l,x_cut_max_l-x_cut_min_l))#self.cut_frame_l.shape)
         self.scale_r = div_tuples(self.calibration_page.shape,self.cut_frame_r.shape)
+        #self.scale_l = self.calc_scale(tuple(x_cut_max_l-x_cut_min_l,y_cut_max_l-y_cut_min_l),tuple(x_cut_max_r-x_cut_min_r,y_cut_max_r-y_cut_min_r))
+
+        #self.save_calibration(foldername, offset_calibrated_cut)
+
+        #camera.release()
+        print('Calibration Finished')
+        cv2.destroyAllWindows()
+        #start_message(final_folder_path)
+    def calibrate(self,final_folder_path, foldername,camera):
+        corner  = 0
+        calibration_cut_left = []
+        calibration_cut_right = []
+        started = False
+        while (corner<len(self.corners)): # calibration of 4 corners
+            
+            # draw circle
+            cv2.circle(self.calibration_page, self.corners[corner], 40, (0, 255, 0), -1)
+
+            
+
+
+
+            ret, frame = camera.read()   # Capture frame
+            frame = cv2.flip(frame, 1)  # flip camera sees things mirorred
+
+            #gray_scale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # gray-scale to work with
+
+            
+            tr.refresh(frame)
+            #pupils = tr.pupil_left_coords(),tr.pupil_right_coords()
+            pupils = tr.vertical_ratio(),tr.horizontal_ratio()
+            #pupils = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+            print(pupils)
+            '''
+            # detect faces in frame
+            faces = detector(gray_scale_frame)
+            if len(faces)> 1:
+                print('Please avoid multiple faces.')
+                sys.exit()
+
+            for face in faces:
+                landmarks = predictor(gray_scale_frame, face) # find points in face
+
+                # get position of right eye and display lines
+                #right_eye_coordinates = get_eye_coordinates(landmarks, [42, 43, 44, 45, 46, 47])
+                right_eye_coordinates = get_eye_coordinates(landmarks, self.pupilTracker.right)
+                display_eye_lines(frame, right_eye_coordinates, 'green')
+
+            # define the coordinates of the pupil from the centroid of the right eye
+            pupil_coordinates = np.mean([right_eye_coordinates[2], right_eye_coordinates[3]], axis = 0).astype('int')
+            '''
+
+            if cv2.waitKey(33) == ord('a') and pupils[0] is not None and pupils[1] is not None:
+                calibration_cut_left.append(pupils)
+                #calibration_cut_right.append(pupils[1])
+                
+                
+                # visualize message
+                cv2.putText(self.calibration_page, 'ok',tuple(np.array(self.corners[corner])-5), cv2.FONT_HERSHEY_SIMPLEX, 2,(0, 0, 0), 5)
+                
+                corner += 1
+                started = False
+
+            # Display results
+            # print(calibration_cut, '    len: ', len(calibration_cut))
+            self.show_window('projection', self.calibration_page)
+            # show_window('frame', cv2.resize(frame,  (640, 360)))
+
+            if cv2.waitKey(113) == ord('q'):
+                break
+        print(calibration_cut_left)
+        # Process calibration
+        #x_cut_min_l, x_cut_max_l, y_cut_min_l, y_cut_max_l = self.find_cut_limits(calibration_cut)
+        #offset_calibrated_cut = [ x_cut_min, y_cut_min ]
+        x_cut_min_l, x_cut_max_l, y_cut_min_l, y_cut_max_l,self.offset_calibrated_cut_left  = self.find_cut_limits_offset(calibration_cut_left)
+        #x_cut_min_r, x_cut_max_r, y_cut_min_r, y_cut_max_r,self.offset_calibrated_cut_right  = self.find_cut_limits_offset(calibration_cut_right)
+        
+        #self.cut_frame_l = np.copy(self.calibration_page[y_cut_min_l:y_cut_max_l, x_cut_min_l:x_cut_max_l, :])
+        #self.cut_frame_r = np.copy(self.calibration_page[y_cut_min_r:y_cut_max_r, x_cut_min_r:x_cut_max_r, :])
+        #self.offset_calibrated_cut_left = self.offset_calibrated_cut(calibration_cut_left)
+        #self.offset_calibrated_cut_right = self.offset_calibrated_cut(calibration_cut_right)
+
+        
+        #self.scale_l = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_l.shape))
+        #self.scale_r = (np.array(self.calibration_page.shape) / np.array(self.cut_frame_r.shape))
+        
+        self.scale_l = div_tuples(self.calibration_page.shape,(y_cut_max_l-y_cut_min_l,x_cut_max_l-x_cut_min_l))#self.cut_frame_l.shape)
+        #self.scale_r = div_tuples(self.calibration_page.shape,self.cut_frame_r.shape)
         #self.scale_l = self.calc_scale(tuple(x_cut_max_l-x_cut_min_l,y_cut_max_l-y_cut_min_l),tuple(x_cut_max_r-x_cut_min_r,y_cut_max_r-y_cut_min_r))
 
         #self.save_calibration(foldername, offset_calibrated_cut)
@@ -440,6 +537,22 @@ class gaze_tracker:
         left = multi_tuples(subtract_tuples(pupil_l,self.offset_calibrated_cut_left),self.scale_l)
         right = multi_tuples(subtract_tuples(pupil_r,self.offset_calibrated_cut_right),self.scale_r)
         return left ,right
+    def track_in_frame2(self,frame):
+        frame = cv2.flip(frame, 1)  # flip camera sees things mirorred
+        tr.refresh(frame)
+        pupil_l = tr.pupil_left_coords()
+        pupil_r  = tr.pupil_right_coords()
+        pupils = tr.vertical_ratio(),tr.horizontal_ratio()
+        if pupils[0] == None or pupils[1]==None:
+            return (0,0)
+        print(self.size_screen)
+        #pupil_l,pupil_r = self.pupilTracker.detect_in_frame(self.pupilTracker,frame)
+        #return pupil_l + self.offset_calibrated_cut_left,pupil_r + self.offset_calibrated_cut_right
+        #return pupil_l - self.offset_calibrated_cut_left,pupil_r - self.offset_calibrated_cut_right
+        left = multi_tuples(subtract_tuples(pupils,self.offset_calibrated_cut_left),self.scale_l)
+        #right = multi_tuples(subtract_tuples(pupil_r,self.offset_calibrated_cut_right),self.scale_r)
+        left = clamp_tuple(left,(0,0),self.size_screen)
+        return left #,right
         
 
         
@@ -448,7 +561,8 @@ tr = GazeTracking()
 tracker = pupil_tracker
 gaze = gaze_tracker
 print(gaze.corners)
-gaze.calibration(gaze,"test","test",cap)
+#gaze.calibration(gaze,"test","test",cap)
+gaze.calibrate(gaze,"test","test",cap)
 user32 = ctypes.windll.user32
 size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
 blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
@@ -456,15 +570,16 @@ while True:
      _, frame = cap.read()
      #tr.refresh(frame)
      #pupils = tracker.detect_in_frame(tracker,frame)
-     pupils = gaze.track_in_frame(gaze,frame)
+     pupils = gaze.track_in_frame2(gaze,frame)
      print(pupils)
      #pupil = tr.pupil_left_coords()
      #print(str(pupil))
      main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
      #frame = tr.annotated_frame()
      main_window = frame
-     cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-     cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+     cv2.circle(main_window,(int(pupils[0]),int(pupils[1])),10,(0,255,0),3)
+     #cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
+     #cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
      #cv2.imshow("Frame",frame )
      
      cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
