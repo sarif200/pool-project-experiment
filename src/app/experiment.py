@@ -100,8 +100,8 @@ def cycle_images(final_folder_path):
             print("Can't receive frame (stream end?). Exiting ...")
             break
 
-        pupils = tracker.detect_in_frame(tracker,frame)
-        # pupils = gaze.track_in_frame(gaze,frame)
+        # pupils = tracker.detect_in_frame(tracker,frame)
+        pupils = gaze.track_in_frame(gaze,frame)
 
         # output.write(frame)
         pupil_l = (int(pupils[0][0]),int(pupils[0][1]))
