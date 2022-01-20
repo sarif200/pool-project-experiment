@@ -4,6 +4,7 @@ import dlib
 import os 
 import ctypes
 import sys
+import pandas as pd
 from gaze_tracking import GazeTracking
 
 # used https://github.com/MCodez/PUPIL-Detection-using-OpenCV
@@ -553,6 +554,22 @@ class gaze_tracker:
         #right = multi_tuples(subtract_tuples(pupil_r,self.offset_calibrated_cut_right),self.scale_r)
         left = clamp_tuple(left,(0,0),self.size_screen)
         return left #,right
+
+    # Export the data
+    def export(delta_since_last_change, pupil_l, pupil_r, project_folder, image):
+        # Set data structure
+        data = {
+                'Time Stamp': delta_since_last_change,
+                'Pupil Left': pupil_l,
+                'Pupil Right': pupil_r
+            }
+        
+        # Convert to panda data frame
+        df = pd.DataFrame(data, columns = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
+        
+        # Convert & export to excel
+        # Converted to 1 file with different sheet
+        df.to_excel(project_folder + 'results.xlsx', sheet_name=image, index=False)
         
 
         
