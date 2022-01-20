@@ -482,8 +482,8 @@ class gaze_tracker:
             # define the coordinates of the pupil from the centroid of the right eye
             pupil_coordinates = np.mean([right_eye_coordinates[2], right_eye_coordinates[3]], axis = 0).astype('int')
             '''
-
-            if cv2.waitKey(33) == ord('a') and pupils[0] is not None and pupils[1] is not None:
+            key = cv2.waitKey(1)
+            if key == 32 and pupils[0] is not None and pupils[1] is not None:
                 calibration_cut_left.append(pupils)
                 #calibration_cut_right.append(pupils[1])
                 
@@ -499,8 +499,11 @@ class gaze_tracker:
             self.show_window('projection', self.calibration_page)
             # show_window('frame', cv2.resize(frame,  (640, 360)))
 
-            if cv2.waitKey(113) == ord('q'):
+            
+            
+            if key == 27:
                 break
+
         print(calibration_cut_left)
         # Process calibration
         #x_cut_min_l, x_cut_max_l, y_cut_min_l, y_cut_max_l = self.find_cut_limits(calibration_cut)

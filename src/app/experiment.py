@@ -67,11 +67,11 @@ def cycle_images(final_folder_path):
     idx = 1
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-    # fps = 15
+    fps = 15
 
-    # # Video Codec
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
+    # Video Codec
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
     
     prev_time = time.time()
     delta_since_last_change = 0
@@ -114,5 +114,5 @@ def cycle_images(final_folder_path):
             break
 
     cap.release()
-    # output.release()
+    output.release()
     cv2.destroyAllWindows()

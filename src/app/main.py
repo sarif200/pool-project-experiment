@@ -20,7 +20,7 @@ def main():
             sg.Text("Instructions:")
         ],
         [
-            sg.Multiline("Stap 1: klik op maak nieuw project. \nStap 2: Vul de gewenste project naam in. \nStap 3: Klik op calibreer, kijk naar de groene cirkels. Druk op de toets a wanneer je ernaar kijkt (meerdere klik soms nodig). \nStap 4: Wanneer de calibratie voltooid is druk op het de start knop om het experiment te starten. \nStap 5: Kijk naar de foto's zonder je blik te forceren.", size=(450,500), key='textbox', font="Helvetica 14")
+            sg.Multiline("Stap 1: klik op nieuw project. \nStap 2: Vul de gewenste project naam in. \nStap 3: Klik op calibreer, kijk naar de groene cirkels. Druk op de spatie toets wanneer je ernaar kijkt (meerdere klik soms nodig). \nStap 4: Wanneer de calibratie voltooid is druk op het de start knop om het experiment te starten. \nStap 5: Kijk naar de foto's zonder je blik te forceren.", size=(450,500), key='textbox', font="Helvetica 14")
         ]
     ]
     
