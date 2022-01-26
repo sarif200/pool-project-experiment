@@ -4,11 +4,8 @@ import dlib
 import os 
 import ctypes
 import sys
-#import pandas as pd
-from eye import Eye
-from calibration import Calibration
+import pandas as pd
 from gaze_tracking import GazeTracking
-from face_gaze_estimator import estimateGaze
 
 # used https://github.com/MCodez/PUPIL-Detection-using-OpenCV
 
@@ -23,7 +20,7 @@ from face_gaze_estimator import estimateGaze
 # l = left (-x) and r = right (+x) 
 
 filename = './src/assets/video.mp4'
-#filename = ''
+filename = ''
 
 if filename == '':
     file = 0
@@ -34,7 +31,7 @@ else:
     file = os.path.abspath(filename)
     print(file)
    
-cap = cv2.VideoCapture(file)
+cap = cv2.VideoCapture(file, cv2.CAP_DSHOW)
 
 cap.set(cv2.CAP_PROP_FPS,60)
 
@@ -105,7 +102,7 @@ def div_tuples(tuple1,tuple2):
 def clamp_tuple(num,min_num,max_num):
     return clamp(num[0],min_num[0],max_num[0]),clamp(num[1],min_num[1],max_num[1])
 
-class pupil_tracker_old:
+class pupil_tracker:
     left = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     right = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
     start_pos = 0
@@ -273,117 +270,11 @@ class pupil_tracker_old:
         
         return pupil_l,pupil_r
 
-class Plane(object):
-    def __init__(self,translation,normal):
-        self.normal = normal
-        self.d = -translation
-
-
-class analytical_tracker(object):
-    
-    """
-    This class tracks the user's gaze.
-    It provides useful information like the position of the eyes
-    and pupils and allows to know if the eyes are open or closed
-    """
-
-    face_gaze_reconstruction_points = [33,8,36,45,48,54]
-
-    def __init__(self):
-        self.frame = None
-        self.eye_left = None
-        self.eye_right = None
-        self.calibration = Calibration()
-
-        self.translation = None
-        self.normal = None
-        # _face_detector is used to detect faces
-        self._face_detector = dlib.get_frontal_face_detector()
-
-        # _predictor is used to get facial landmarks of a given face
-        cwd = os.path.abspath(os.path.dirname(__file__))
-        model_path = os.path.abspath(os.path.join(cwd, "../assets/shape_predictor_68_face_landmarks.dat"))
-        self._predictor = dlib.shape_predictor(model_path)
-
-    @property
-    def pupils_located(self):
-        """Check that the pupils have been located"""
-        try:
-            int(self.eye_left.pupil.x)
-            int(self.eye_left.pupil.y)
-            int(self.eye_right.pupil.x)
-            int(self.eye_right.pupil.y)
-            return True
-        except Exception:
-            return False
-
-    def _analyze(self):
-        """Detects the face and initialize Eye objects"""
-        frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-        faces = self._face_detector(frame)
-
-        try:
-            landmarks = self._predictor(frame, faces[0])
-           
-            facialLandmarkFeatures = np.empty([6, 2], dtype = "double")
-            for i,point in enumerate(self.face_gaze_reconstruction_points):
-                facialLandmarkFeatures[i][0] = landmarks.part(point).x
-                facialLandmarkFeatures[i][1] = landmarks.part(point).x
-            self.translation,self.normal = estimateGaze(frame,facialLandmarkFeatures)
-            #print(self.translation,self.normal)
-            self.eye_left = Eye(frame, landmarks, 0, self.calibration,self.translation,self.normal)
-            self.eye_right = Eye(frame, landmarks, 1, self.calibration,self.translation,self.normal)
-
-        except IndexError:
-            self.eye_left = None
-            self.eye_right = None
-
-    def refresh(self, frame):
-        """Refreshes the frame and analyzes it.
-
-        Arguments:
-            frame (numpy.ndarray): The frame to analyze
-        """
-        if self.calibration.camera_matrix is None:
-            self.calibration.set_camera_matrix(frame)
-
-        self.frame = frame
-        self._analyze()
-    def pupil_left_coords(self):
-        """Returns the coordinates of the left pupil"""
-        if self.pupils_located:
-            x = self.eye_left.origin[0] + self.eye_left.pupil.x
-            y = self.eye_left.origin[1] + self.eye_left.pupil.y
-            return (x, y)
-
-    def pupil_right_coords(self):
-        """Returns the coordinates of the right pupil"""
-        if self.pupils_located:
-            x = self.eye_right.origin[0] + self.eye_right.pupil.x
-            y = self.eye_right.origin[1] + self.eye_right.pupil.y
-            return (x, y)
-    def annotated_frame(self):
-        """Returns the main frame with pupils highlighted"""
-        frame = self.frame.copy()
-
-        if self.pupils_located:
-            color = (0, 255, 0)
-            x_left, y_left = self.pupil_left_coords()
-            x_right, y_right = self.pupil_right_coords()
-            cv2.line(frame, (x_left - 5, y_left), (x_left + 5, y_left), color)
-            cv2.line(frame, (x_left, y_left - 5), (x_left, y_left + 5), color)
-            cv2.line(frame, (x_right - 5, y_right), (x_right + 5, y_right), color)
-            cv2.line(frame, (x_right, y_right - 5), (x_right, y_right + 5), color)
-            
-            cv2.circle(frame,(int(self.eye_left.origin_3d_projected[0]),int(self.eye_left.origin_3d_projected[1])),10,color,3)
-            cv2.line(frame, (x_left, y_left ), (int(self.eye_left.origin_3d_projected[0]),int(self.eye_left.origin_3d_projected[1])), color)
-            
-        return frame
 
 
 class gaze_tracker:
     
-    pupilTracker = pupil_tracker_old
+    pupilTracker = pupil_tracker
     tr = GazeTracking()
     width = 1366#1860
     height = 768#1020
@@ -687,30 +578,29 @@ class gaze_tracker:
         
         
 tr = GazeTracking()
-t2 = analytical_tracker()
-#tracker = pupil_tracker
-#gaze = gaze_tracker
-#print(gaze.corners)
-##gaze.calibration(gaze,"test","test",cap)
-#gaze.calibrate(gaze,"test","test",cap)
+tracker = pupil_tracker
+gaze = gaze_tracker
+print(gaze.corners)
+#gaze.calibration(gaze,"test","test",cap)
+gaze.calibrate(gaze,"test","test",cap)
 user32 = ctypes.windll.user32
 size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
 blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
 while True:
      _, frame = cap.read()
-     t2.refresh(frame)
+     #tr.refresh(frame)
      #pupils = tracker.detect_in_frame(tracker,frame)
-     #pupils = gaze.track_in_frame2(gaze,frame)
-     #print(pupils)
-     #pupil = t2.pupil_left_coords()
+     pupils = gaze.track_in_frame2(gaze,frame)
+     print(pupils)
+     #pupil = tr.pupil_left_coords()
      #print(str(pupil))
      main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
      #frame = tr.annotated_frame()
-     main_window = t2.annotated_frame()
-     #cv2.circle(main_window,(int(pupils[0]),int(pupils[1])),10,(0,255,0),3)
-     ##cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-     ##cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
-     ##cv2.imshow("Frame",frame )
+     main_window = frame
+     cv2.circle(main_window,(int(pupils[0]),int(pupils[1])),10,(0,255,0),3)
+     #cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
+     #cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+     #cv2.imshow("Frame",frame )
      
      cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
      cv2.setWindowProperty("title_window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
