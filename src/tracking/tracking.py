@@ -23,7 +23,7 @@ from face_gaze_estimator import estimateGaze
 # l = left (-x) and r = right (+x) 
 
 filename = './src/assets/video.mp4'
-#filename = ''
+filename = ''
 
 if filename == '':
     file = 0
@@ -377,6 +377,8 @@ class analytical_tracker(object):
             
             cv2.circle(frame,(int(self.eye_left.origin_3d_projected[0]),int(self.eye_left.origin_3d_projected[1])),10,color,3)
             cv2.line(frame, (x_left, y_left ), (int(self.eye_left.origin_3d_projected[0]),int(self.eye_left.origin_3d_projected[1])), color)
+            cv2.circle(frame,(int(self.eye_right.origin_3d_projected[0]),int(self.eye_right.origin_3d_projected[1])),10,color,3)
+            cv2.line(frame, (x_right, y_right ), (int(self.eye_right.origin_3d_projected[0]),int(self.eye_right.origin_3d_projected[1])), color)
             
         return frame
 
@@ -698,6 +700,7 @@ size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
 blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
 while True:
      _, frame = cap.read()
+     frame = cv2.flip(frame, 1)
      t2.refresh(frame)
      #pupils = tracker.detect_in_frame(tracker,frame)
      #pupils = gaze.track_in_frame2(gaze,frame)

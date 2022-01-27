@@ -30,15 +30,18 @@ class Eye(object):
         #self.origin_3d = isect_line_plane_v3((0,0,0),self.to_3d_vec_from_cam((self.origin[0]+self.center[0],self.origin[1]+self.center[1]),calibration),translation,normal)
         #self.origin_3d = np.array([(self.origin_3d[0],self.origin_3d[1],self.origin_3d[2])]) - cv2.normalize(normal,0,1) * 24
         
-        self.origin_3d = self.to_3d_on_plane((self.origin[0]+self.center[0],self.origin[1]+self.center[1]),translation,normal,calibration) - cv2.normalize(normal,0,1) * 24
-        self.pupil_3d = self.to_3d_on_plane((self.origin[0]+self.pupil.x,self.origin[1]+self.pupil.y),translation,normal,calibration)
-        self.gaze_dir_3d = self.origin_3d - self.pupil_3d 
-        print(self.origin_3d[0],self.pupil_3d[0])
-        self.screen_cord = isect_line_plane_v3(self.origin_3d[0],self.pupil_3d[0],(0,0,0),(0,0,1))
-        print(self.screen_cord)
-        #(end_point2D, jacobian) = cv2.projectPoints((screen_cord[0],screen_cord[1],screen_cord[2]), (0,0,0), (0,0,0), calibration.camera_matrix, np.zeros((4,1)))
-        self.origin_3d_projected = self.screen_cord
-        #print("2dprojection: ",end_point2D)
+        self.origin_3d = self.to_3d_on_plane((self.origin[0]+self.center[0],self.origin[1]+self.center[1]),translation,normal,calibration) - cv2.normalize(normal,0,1) * 100 #hack random number that works well
+        if not(self.pupil.x==None or self.pupil.y == None):
+            self.pupil_3d = self.to_3d_on_plane((self.origin[0]+self.pupil.x,self.origin[1]+self.pupil.y),translation,normal,calibration)
+            self.gaze_dir_3d = self.origin_3d - self.pupil_3d 
+            #print(self.origin_3d[0],self.pupil_3d[0])
+            self.screen_cord = isect_line_plane_v3(self.origin_3d[0],self.pupil_3d[0],(0,0,0),(0,0,1))
+            #print(self.screen_cord)
+            #(end_point2D, jacobian) = cv2.projectPoints((screen_cord[0],screen_cord[1],screen_cord[2]), (0,0,0), (0,0,0), calibration.camera_matrix, np.zeros((4,1)))
+            self.origin_3d_projected = ((self.screen_cord[0]/1)+400,(self.screen_cord[1]/1)+200) #hack these numbers are found by experimenting
+        else:
+            self.origin_3d_projected = (0,0)
+        print("2dprojection: ",self.origin_3d_projected)
 
     @staticmethod
     def _middle_point(p1, p2):
