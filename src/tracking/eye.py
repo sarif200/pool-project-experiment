@@ -22,6 +22,7 @@ class Eye(object):
         self.origin_3d = None
         self.pupil_3d = None
         self.gaze_dir_3d = None
+        self.screen_cord = None
         
         self._analyze(original_frame, landmarks, side, calibration)
         #print(self.to_3d_vec_from_cam(self.origin,calibration))
@@ -32,11 +33,12 @@ class Eye(object):
         self.origin_3d = self.to_3d_on_plane((self.origin[0]+self.center[0],self.origin[1]+self.center[1]),translation,normal,calibration) - cv2.normalize(normal,0,1) * 24
         self.pupil_3d = self.to_3d_on_plane((self.origin[0]+self.pupil.x,self.origin[1]+self.pupil.y),translation,normal,calibration)
         self.gaze_dir_3d = self.origin_3d - self.pupil_3d 
-
-        print(self.gaze_dir_3d)
-        (end_point2D, jacobian) = cv2.projectPoints(self.pupil_3d + self.gaze_dir_3d, (0,0,0), (0,0,0), calibration.camera_matrix, np.zeros((4,1)))
-        self.origin_3d_projected = end_point2D[0][0]
-        print("2dprojection: ",end_point2D)
+        print(self.origin_3d[0],self.pupil_3d[0])
+        self.screen_cord = isect_line_plane_v3(self.origin_3d[0],self.pupil_3d[0],(0,0,0),(0,0,1))
+        print(self.screen_cord)
+        #(end_point2D, jacobian) = cv2.projectPoints((screen_cord[0],screen_cord[1],screen_cord[2]), (0,0,0), (0,0,0), calibration.camera_matrix, np.zeros((4,1)))
+        self.origin_3d_projected = self.screen_cord
+        #print("2dprojection: ",end_point2D)
 
     @staticmethod
     def _middle_point(p1, p2):
