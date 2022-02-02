@@ -313,6 +313,8 @@ class analytical_tracker(object):
             int(self.eye_left.pupil.y)
             int(self.eye_right.pupil.x)
             int(self.eye_right.pupil.y)
+            int(self.eye_left.screen_cord)
+            int(self.eye_right.screen_cord)
             return True
         except Exception:
             return False
@@ -362,6 +364,20 @@ class analytical_tracker(object):
             x = self.eye_right.origin[0] + self.eye_right.pupil.x
             y = self.eye_right.origin[1] + self.eye_right.pupil.y
             return (x, y)
+
+
+    def pupil_left_screen_coords(self):
+        """Returns the coordinates of the left pupil"""
+        if self.pupils_located:
+            x = self.eye_left.screen_cord[0]
+            y = self.eye_left.screen_cord[1]
+            return (x, y)
+    def pupil_right_screen_coords(self):
+        """Returns the coordinates of the right pupil"""
+        if self.pupils_located:
+            x = self.eye_right.screen_cord[0]
+            y = self.eye_right.screen_cord[1]
+            return (x, y)
     def annotated_frame(self):
         """Returns the main frame with pupils highlighted"""
         frame = self.frame.copy()
@@ -381,6 +397,8 @@ class analytical_tracker(object):
             cv2.line(frame, (x_right, y_right ), (int(self.eye_right.origin_3d_projected[0]),int(self.eye_right.origin_3d_projected[1])), color)
             
         return frame
+
+
 
 
 class gaze_tracker:

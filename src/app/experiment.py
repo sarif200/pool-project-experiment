@@ -4,16 +4,37 @@ import time
 import sys
 import ctypes
 import numpy as np
+import pandas as pd
+from tracking import analytical_tracker
 
 scriptDir = os.path.dirname(__file__)
 tracking_folder = os.path.join(scriptDir, '../tracking/')
 path = os.path.abspath(tracking_folder)
 
 sys.path.append(path)
-from tracking import pupil_tracker, gaze_tracker
 
-tracker = pupil_tracker
-gaze = gaze_tracker
+tracker = analytical_tracker()
+#gaze = gaze_tracker
+
+def export(delta_since_last_change, pupil_l, pupil_r, project_folder, image):
+        # Set data structure
+        data = {
+                'Time Stamp': delta_since_last_change,
+                'Pupil Left': pupil_l,
+                'Pupil Right': pupil_r
+            }
+        
+        # Convert to panda data frame
+        df = pd.DataFrame(data, columns = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
+        path = r"C:\Users\fedel\Desktop\excelData\PhD_data.xlsx"
+        writer = pd.ExcelWriter(project_folder, engine='openpyxl')
+        
+        writer.save()
+        # Convert & export to excel
+        # Converted to 1 file with different sheet
+        #df.to_excel(project_folder + 'results.xlsx', sheet_name=image, index=False)
+        df.to_excel(writer, sheet_name=image, index=False)
+        writer.save()
 
 def show_image(img_path):
     # Get screen size
@@ -75,9 +96,10 @@ def cycle_images(final_folder_path):
     
     prev_time = time.time()
     delta_since_last_change = 0
-
+    writer = pd.ExcelWriter(final_folder_path + 'results.xlsx', engine='openpyxl')
     show_image(os.path.join(img_folder, images[0]))
-
+    pupil_l = []
+    pupil_r = []
     while (idx < cnt):
         ret, frame = cap.read()
         if not ret:
@@ -85,15 +107,22 @@ def cycle_images(final_folder_path):
             break
 
         # pupils = tracker.detect_in_frame(tracker,frame)
-        pupils = gaze.track_in_frame(gaze,frame)
+        #pupils = gaze.track_in_frame(gaze,frame)
 
-        # output.write(frame)
-        pupil_l = (int(pupils[0][0]),int(pupils[0][1]))
-        pupil_r = (int(pupils[1][0]),int(pupils[1][1]))
+        frame = cv2.flip(frame, 1)
+        tracker.refresh(frame)
+        try:
+            pupils = (tracker.pupil_left_screen_coords(),tracker.pupil_right_screen_coords())
+            # output.write(frame)
+            pupil_l.append( (int(pupils[0][0]),int(pupils[0][1])))
+            pupil_r.append((int(pupils[1][0]),int(pupils[1][1])))
 
-        cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0, 255, 0),3)
-        cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(255, 0, 0),3)
-        cv2.imshow('frame', frame)
+            cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0, 255, 0),3)
+            cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(255, 0, 0),3)
+            cv2.imshow('frame', frame)
+        except Exception:
+            pupil_l.append((0,0))
+            pupil_r.append((0,0))
         
         delta = time.time() - prev_time 
         delta_since_last_change += delta
@@ -105,14 +134,34 @@ def cycle_images(final_folder_path):
             show_image(img_path)
             print(images[idx])
 
-            gaze.export(delta_since_last_change, pupil_l, pupil_r, project_folder, images[idx])
+            # Set data structure
+            data = {
+                    'Time Stamp': delta_since_last_change,
+                    'Pupil Left': pupil_l,
+                    'Pupil Right': pupil_r
+                }
+        
+            # Convert to panda data frame
+            df = pd.DataFrame(data, columns = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
+            
+            
+        
+            #writer.save()
+            # Convert & export to excel
+            # Converted to 1 file with different sheet
+            #df.to_excel(project_folder + 'results.xlsx', sheet_name=image, index=False)
+            df.to_excel(writer, sheet_name=images[idx], index=False)
+            writer.save()
+            #export(delta_since_last_change, pupil_l, pupil_r, final_folder_path, images[idx])
+            pupil_l = []
+            pupil_r = []
 
             idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
         if key == 27:
             break
-
+    writer.close()
     cap.release()
     output.release()
     cv2.destroyAllWindows()

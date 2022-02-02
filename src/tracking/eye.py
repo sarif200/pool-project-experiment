@@ -38,7 +38,8 @@ class Eye(object):
             self.screen_cord = isect_line_plane_v3(self.origin_3d[0],self.pupil_3d[0],(0,0,0),(0,0,1))
             #print(self.screen_cord)
             #(end_point2D, jacobian) = cv2.projectPoints((screen_cord[0],screen_cord[1],screen_cord[2]), (0,0,0), (0,0,0), calibration.camera_matrix, np.zeros((4,1)))
-            self.origin_3d_projected = ((self.screen_cord[0]/1)+400,(self.screen_cord[1]/1)+200) #hack these numbers are found by experimenting
+            #self.origin_3d_projected = ((self.screen_cord[0]/1)+400,(self.screen_cord[1]/1)+200) #hack these numbers are found by experimenting
+            self.screen_cord = ((self.screen_cord[0]/1)+400,(self.screen_cord[1]/1)+200) #hack these numbers are found by experimenting
         else:
             self.origin_3d_projected = (0,0)
         print("2dprojection: ",self.origin_3d_projected)

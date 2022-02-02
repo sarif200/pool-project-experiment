@@ -3,7 +3,8 @@ import os
 import sys
 import cv2
 from functions import start_message
-from calibration import calibration
+from experiment import cycle_images
+#from calibration_old import calibration
 
 scriptDir = os.path.dirname(__file__)
 tracking_folder = os.path.join(scriptDir, '../tracking/')
@@ -44,7 +45,7 @@ def createFolder():
     # Create window & event loop
     window = sg.Window(foldername, layout)
 
-    while True:
+    while False:
         event, values = window.read()
         if event == "calibrate":
             window.close()
@@ -63,7 +64,8 @@ def createFolder():
             
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-    
+    cycle_images(final_folder_path)
+
     window.close()
 
     # Return folder path for later use
