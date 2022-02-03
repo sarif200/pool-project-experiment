@@ -72,7 +72,9 @@ def cycle_images(final_folder_path):
     filename = "original_video.avi"
     currentdir_folder = os.path.join(final_folder_path, filename)
     project_folder = os.path.abspath(currentdir_folder)
-
+    
+    exel_currentdir_folder = os.path.join(final_folder_path, "results.xlsx")
+    exel_project_folder = os.path.abspath(exel_currentdir_folder)
     TIME = 3
     t = TIME * 1000 # transform to miliseconds
 
@@ -86,20 +88,25 @@ def cycle_images(final_folder_path):
 
     cnt = len(images)
     idx = 1
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    cap = cv2.VideoCapture(0)
 
     fps = 15
 
     # Video Codec
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
+    #fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    #output = cv2.VideoWriter(project_folder, fourcc, fps, (640, 480))
     
     prev_time = time.time()
     delta_since_last_change = 0
-    writer = pd.ExcelWriter(final_folder_path + 'results.xlsx', engine='openpyxl')
+    
+    #writer = pd.ExcelWriter(final_folder_path + 'results.xlsx', engine='openpyxl')
+    writer = pd.ExcelWriter(exel_project_folder, engine='openpyxl')
     show_image(os.path.join(img_folder, images[0]))
-    pupil_l = []
-    pupil_r = []
+    pupil_l_x = []
+    pupil_l_y = []
+    pupil_r_x = []
+    pupil_r_y = []
+    deltas = []
     while (idx < cnt):
         ret, frame = cap.read()
         if not ret:
@@ -113,36 +120,52 @@ def cycle_images(final_folder_path):
         tracker.refresh(frame)
         try:
             pupils = (tracker.pupil_left_screen_coords(),tracker.pupil_right_screen_coords())
+            #print(pupils)
             # output.write(frame)
-            pupil_l.append( (int(pupils[0][0]),int(pupils[0][1])))
-            pupil_r.append((int(pupils[1][0]),int(pupils[1][1])))
-
-            cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0, 255, 0),3)
-            cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(255, 0, 0),3)
-            cv2.imshow('frame', frame)
+            #if pupils[0] == None:
+            #    pupil_l.append((0,0))
+            #else:
+            #    pupil_l.append(pupils[0])
+            #if pupils[1] == None:
+            #    pupil_r.append((0,0))
+            #else:
+            #    pupil_r.append(pupils[1])
+            
+            pupil_l_x.append(pupils[0][0])
+            pupil_l_y.append(pupils[0][1])
+            pupil_r_x.append(pupils[1][0])
+            pupil_r_y.append(pupils[1][1])
+            #print(pupil_l)
+            #cv2.circle(frame,(int(pupils[0][0]),int(pupils[0][1])),10,(0, 255, 0),3)
+            #cv2.circle(frame,(int(pupils[1][0]),int(pupils[1][1])),10,(255, 0, 0),3)
+            #cv2.imshow('frame', frame)
         except Exception:
-            pupil_l.append((0,0))
-            pupil_r.append((0,0))
+            pupil_l_x.append(0)
+            pupil_l_y.append(0)
+            pupil_r_x.append(0)
+            pupil_r_y.append(0)
         
         delta = time.time() - prev_time 
         delta_since_last_change += delta
         prev_time = time.time()
-
+        deltas.append(delta)
         if delta_since_last_change >= TIME:
-            delta_since_last_change = 0
+            
             img_path = os.path.join(img_folder, images[idx])
             show_image(img_path)
             print(images[idx])
 
             # Set data structure
             data = {
-                    'Time Stamp': delta_since_last_change,
-                    'Pupil Left': pupil_l,
-                    'Pupil Right': pupil_r
+                    'Time Stamp': deltas,
+                    'Pupil Left x': pupil_l_x,
+                    'Pupil Left y': pupil_l_y,
+                    'Pupil Right x': pupil_r_x,
+                    'Pupil Right y': pupil_r_y 
                 }
         
             # Convert to panda data frame
-            df = pd.DataFrame(data, columns = ['Time Stamp', 'Pupil Left', 'Pupil Right'])
+            df = pd.DataFrame(data, columns = ['Time Stamp', 'Pupil Left x','Pupil Left y', 'Pupil Right x','Pupil Right y'])
             
             
         
@@ -153,9 +176,12 @@ def cycle_images(final_folder_path):
             df.to_excel(writer, sheet_name=images[idx], index=False)
             writer.save()
             #export(delta_since_last_change, pupil_l, pupil_r, final_folder_path, images[idx])
-            pupil_l = []
-            pupil_r = []
-
+            delta_since_last_change = 0
+            pupil_l_x = []
+            pupil_l_y = []
+            pupil_r_x = []
+            pupil_r_y = []
+            deltas = []
             idx += 1 if idx < cnt else cnt
 
         key = cv2.waitKey(1)
@@ -163,5 +189,5 @@ def cycle_images(final_folder_path):
             break
     writer.close()
     cap.release()
-    output.release()
+    #output.release()
     cv2.destroyAllWindows()

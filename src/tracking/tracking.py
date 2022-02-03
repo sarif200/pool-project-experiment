@@ -313,8 +313,9 @@ class analytical_tracker(object):
             int(self.eye_left.pupil.y)
             int(self.eye_right.pupil.x)
             int(self.eye_right.pupil.y)
-            int(self.eye_left.screen_cord)
-            int(self.eye_right.screen_cord)
+            #print(self.eye_left.screen_cord[0])
+            int(self.eye_left.screen_cord[0])
+            int(self.eye_right.screen_cord[0])
             return True
         except Exception:
             return False
@@ -346,6 +347,7 @@ class analytical_tracker(object):
         Arguments:
             frame (numpy.ndarray): The frame to analyze
         """
+        #print("hi")
         if self.calibration.camera_matrix is None:
             self.calibration.set_camera_matrix(frame)
 
@@ -369,14 +371,14 @@ class analytical_tracker(object):
     def pupil_left_screen_coords(self):
         """Returns the coordinates of the left pupil"""
         if self.pupils_located:
-            x = self.eye_left.screen_cord[0]
-            y = self.eye_left.screen_cord[1]
+            x = self.eye_left.screen_cord[0][0]
+            y = self.eye_left.screen_cord[1][0]
             return (x, y)
     def pupil_right_screen_coords(self):
         """Returns the coordinates of the right pupil"""
         if self.pupils_located:
-            x = self.eye_right.screen_cord[0]
-            y = self.eye_right.screen_cord[1]
+            x = self.eye_right.screen_cord[0][0]
+            y = self.eye_right.screen_cord[1][0]
             return (x, y)
     def annotated_frame(self):
         """Returns the main frame with pupils highlighted"""
@@ -706,42 +708,42 @@ class gaze_tracker:
 
         
         
-tr = GazeTracking()
-t2 = analytical_tracker()
-#tracker = pupil_tracker
-#gaze = gaze_tracker
-#print(gaze.corners)
-##gaze.calibration(gaze,"test","test",cap)
-#gaze.calibrate(gaze,"test","test",cap)
-user32 = ctypes.windll.user32
-size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
-blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
-while True:
-     _, frame = cap.read()
-     frame = cv2.flip(frame, 1)
-     t2.refresh(frame)
-     #pupils = tracker.detect_in_frame(tracker,frame)
-     #pupils = gaze.track_in_frame2(gaze,frame)
-     #print(pupils)
-     #pupil = t2.pupil_left_coords()
-     #print(str(pupil))
-     main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
-     #frame = tr.annotated_frame()
-     main_window = t2.annotated_frame()
-     #cv2.circle(main_window,(int(pupils[0]),int(pupils[1])),10,(0,255,0),3)
-     ##cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
-     ##cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
-     ##cv2.imshow("Frame",frame )
+#tr = GazeTracking()
+#t2 = analytical_tracker()
+##tracker = pupil_tracker
+##gaze = gaze_tracker
+##print(gaze.corners)
+###gaze.calibration(gaze,"test","test",cap)
+##gaze.calibrate(gaze,"test","test",cap)
+#user32 = ctypes.windll.user32
+#size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+#blank_page = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+#while True:
+#     _, frame = cap.read()
+#     frame = cv2.flip(frame, 1)
+#     t2.refresh(frame)
+#     #pupils = tracker.detect_in_frame(tracker,frame)
+#     #pupils = gaze.track_in_frame2(gaze,frame)
+#     #print(pupils)
+#     #pupil = t2.pupil_left_coords()
+#     #print(str(pupil))
+#     main_window = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+#     #frame = tr.annotated_frame()
+#     main_window = t2.annotated_frame()
+#     #cv2.circle(main_window,(int(pupils[0]),int(pupils[1])),10,(0,255,0),3)
+#     ##cv2.circle(main_window,(int(pupils[0][0]),int(pupils[0][1])),10,(0,255,0),3)
+#     ##cv2.circle(main_window,(int(pupils[1][0]),int(pupils[1][1])),10,(0,255,0),3)
+#     ##cv2.imshow("Frame",frame )
      
-     cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
-     cv2.setWindowProperty("title_window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-     cv2.imshow("title_window",main_window)
-     key = cv2.waitKey(1)
-     if key == 27:
-         break
+#     cv2.namedWindow("title_window", cv2.WND_PROP_FULLSCREEN)
+#     cv2.setWindowProperty("title_window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#     cv2.imshow("title_window",main_window)
+#     key = cv2.waitKey(1)
+#     if key == 27:
+#         break
    
 
 
 
-cap.release()
-cv2.destroyAllWindows()
+#cap.release()
+#cv2.destroyAllWindows()

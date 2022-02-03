@@ -42,7 +42,7 @@ class Eye(object):
             self.screen_cord = ((self.screen_cord[0]/1)+400,(self.screen_cord[1]/1)+200) #hack these numbers are found by experimenting
         else:
             self.origin_3d_projected = (0,0)
-        print("2dprojection: ",self.origin_3d_projected)
+        #print("2dprojection: ",self.origin_3d_projected)
 
     @staticmethod
     def _middle_point(p1, p2):
