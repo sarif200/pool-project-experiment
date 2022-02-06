@@ -49,13 +49,21 @@ def show_image(img_path):
     mid_y = int(size_screen[1]) / 2
     
     # Get images
-    img = cv2.imread(img_path)
+    #img = cv2.imread(img_path)
+
+    #from https://stackoverflow.com/questions/31656366/cv2-imread-and-cv2-imshow-return-all-zeros-and-black-image 
+    img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    if img.shape[2] == 4:     # we have an alpha channel
+        a1 = ~img[:,:,3]        # extract and invert that alpha
+        img = cv2.add(cv2.merge([a1,a1,a1,a1]), img)   # add up values (with clipping)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)    # strip alpha channel
 
     # Get height & width from image
     img_width, img_height = img.shape[:2]
 
     # Caclulate middle of screen
     yoff = round((mid_y - img_height)/2)
+    #xoff = round((mid_x + img_width/4))
     xoff = round((mid_x + img_width/4))
 
     # Creating overlay
