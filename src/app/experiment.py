@@ -63,8 +63,8 @@ def show_image(img_path):
 
     # Caclulate middle of screen
     yoff = round((mid_y - img_height)/2)
-    #xoff = round((mid_x + img_width/4))
-    xoff = round((mid_x + img_width/4))
+    #xoff = round((mid_x + img_width/8))
+    xoff = round((mid_x + img_width/8))
 
     # Creating overlay
     dst = background.copy()
@@ -160,7 +160,22 @@ def cycle_images(final_folder_path):
         if delta_since_last_change >= TIME:
             
             img_path = os.path.join(img_folder, images[idx])
-            show_image(img_path)
+            if images[idx] == "Twit(512,512).png":
+                # Get screen size
+                user32 = ctypes.windll.user32
+                size_screen = user32.GetSystemMetrics(1), user32.GetSystemMetrics(0)
+    
+                # Create white background
+                background = (np.zeros((int(size_screen[0]), int(size_screen[1]), 3)) + 255).astype('uint8')
+                dst = background.copy()
+                cv2.circle(dst,(512,512),10,(0,0,255),-1)
+                cv2.namedWindow("Display", cv2.WND_PROP_FULLSCREEN)
+                cv2.setWindowProperty("Display", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+                cv2.imshow('Display', dst)
+            else:
+
+                show_image(img_path)
+            
             print(images[idx])
 
             # Set data structure
